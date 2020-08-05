@@ -32,14 +32,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>foundation.fluent.api</groupId>
-    <artifactId>querydsl-search</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>querydsl-parser</artifactId>
+    <version>0.1-SNAPSHOT</version>
     <name>Querydsl predicate language parser</name>
     <description>
         Language used to define JPA query using the JPA model, which under the hood uses Querydsl to construct the predicate.
     </description>
 
-    <url>https://github.com/c0stra/rpg/wiki/querydsl-search</url>
+    <url>https://github.com/c0stra/rpg/wiki/querydsl-parser</url>
 
     <properties>
         <rpg.version>0.11</rpg.version>
@@ -105,8 +105,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/c0stra/querydsl-search.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/c0stra/querydsl-search.git</developerConnection>
+        <connection>scm:git:git://github.com/c0stra/querydsl-parser.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/c0stra/querydsl-parser.git</developerConnection>
         <url>https://github.com/c0stra/rpg</url>
         <tag>HEAD</tag>
     </scm>
