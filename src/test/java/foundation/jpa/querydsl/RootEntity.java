@@ -1,4 +1,4 @@
-package foundation.jpa.query;
+package foundation.jpa.querydsl;
 
 import javax.persistence.*;
 import java.util.List;
