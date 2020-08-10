@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.dsl.Expressions.constant;
@@ -27,7 +28,6 @@ import static foundation.jpa.querydsl.QueryUtils.operation;
 import static foundation.jpa.querydsl.QueryUtils.resolve;
 import static foundation.rpg.common.Patterns.*;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class QueryFactory {
@@ -38,7 +38,7 @@ public class QueryFactory {
 
     public QueryFactory(ConversionService conversionService, Map<String, Object> variables, EntityPath<?> root) {
         this.conversionService = conversionService;
-        this.variables = variables.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> constant(e.getValue())));
+        this.variables = variables;
         this.root = root;
     }
 
@@ -69,6 +69,14 @@ public class QueryFactory {
         if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
             return resolve(rightOperand, leftOperand, conversionService);
         return operation(Ops.EQ, leftOperand, rightOperand);
+    }
+
+    @Relational BooleanExpression is (Expression operand, Is is, Null nul) {
+        return operation(Ops.IS_NULL, operand);
+    }
+
+    @Relational BooleanExpression is (Expression operand, Not not, Null nul) {
+        return operation(Ops.IS_NOT_NULL, operand);
     }
 
     @Relational BooleanExpression is (Expression leftOperand, In operator, LPar opening, @CommaSeparated List<Expression> rightOperands, RPar closing) {
@@ -111,8 +119,6 @@ public class QueryFactory {
 
     Object is (Object object, Dot operator, Identifier property) {
         String name = property.toString();
-        if(object instanceof ListPath)
-            return is(((ListPath<?, ?>) object).any(), operator, property);
         Class<?> type = object instanceof Class ? (Class<?>) object : object.getClass();
         try {
             return type.getField(name).get(object);
@@ -132,7 +138,8 @@ public class QueryFactory {
         Object[] arguments = parameters.stream().map(p -> p instanceof Constant ? ((Constant<?>) p).getConstant() : p).toArray();
         for(Method method : type.getMethods()) try {
             if(method.getName().equals(name) && method.getParameterCount() == size) {
-                return method.invoke(object, arguments);
+                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> conversionService.convert(arguments[i], method.getParameterTypes()[i])).toArray();
+                return method.invoke(object, a);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Unable to invoke method: " + property.toString() + " with " + Arrays.toString(arguments) + " on entity " + object + ".", e);

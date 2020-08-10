@@ -10,7 +10,7 @@ public class RootEntity {
     private long id;
 
     @OneToMany
-    private List<OneToManyEntity> oneToManyEntity;
+    private List<OneToManyEntity> oneToManyEntities;
 
     @ManyToMany
     private List<ManyToManyEntity> manyToManyEntities;
@@ -22,6 +22,8 @@ public class RootEntity {
 
     private int size;
 
+    private EnumValue enumValue;
+
     public long getId() {
         return id;
     }
@@ -31,12 +33,12 @@ public class RootEntity {
         return this;
     }
 
-    public List<OneToManyEntity> getOneToManyEntity() {
-        return oneToManyEntity;
+    public List<OneToManyEntity> getOneToManyEntities() {
+        return oneToManyEntities;
     }
 
-    public RootEntity setOneToManyEntity(List<OneToManyEntity> oneToManyEntity) {
-        this.oneToManyEntity = oneToManyEntity;
+    public RootEntity setOneToManyEntities(List<OneToManyEntity> oneToManyEntities) {
+        this.oneToManyEntities = oneToManyEntities;
         return this;
     }
 
@@ -73,6 +75,15 @@ public class RootEntity {
 
     public RootEntity setSize(int size) {
         this.size = size;
+        return this;
+    }
+
+    public EnumValue getEnumValue() {
+        return enumValue;
+    }
+
+    public RootEntity setEnumValue(EnumValue enumValue) {
+        this.enumValue = enumValue;
         return this;
     }
 }
