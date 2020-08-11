@@ -34,7 +34,7 @@
     <groupId>foundation.fluent.api</groupId>
     <artifactId>querydsl-parser-project</artifactId>
     <packaging>pom</packaging>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <modules>
         <module>querydsl-parser</module>
         <module>spring-jpa-querydsl-parser</module>
@@ -74,7 +74,7 @@
         <connection>scm:git:git://github.com/c0stra/querydsl-parser.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/c0stra/querydsl-parser.git</developerConnection>
         <url>https://github.com/c0stra/rpg</url>
-        <tag>querydsl-parser-project-0.4</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
