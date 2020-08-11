@@ -54,12 +54,11 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
         if(methodParameter.hasParameterAnnotation(QueryCacheName.class)) {
             String name = methodParameter.getParameterAnnotation(QueryCacheName.class).value();
             if(isNull(query)) {
-                query = (String) nativeWebRequest.getAttribute(name, WebRequest.SCOPE_SESSION);
-                //nativeWebRequest.getAttribute("")
                 // Load from session
+                query = (String) nativeWebRequest.getAttribute(name, WebRequest.SCOPE_SESSION);
             } else {
-                nativeWebRequest.setAttribute(name, query, WebRequest.SCOPE_SESSION);
                 // Store in session
+                nativeWebRequest.setAttribute(name, query, WebRequest.SCOPE_SESSION);
             }
         }
         if(isNull(query)) {
