@@ -32,8 +32,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>foundation.fluent.api</groupId>
-    <artifactId>querydsl-parser</artifactId>
+    <artifactId>querydsl-parser-project</artifactId>
+    <packaging>pom</packaging>
     <version>0.3-SNAPSHOT</version>
+    <modules>
+        <module>querydsl-parser</module>
+        <module>spring-jpa-querydsl-parser</module>
+    </modules>
     <name>Querydsl predicate language parser</name>
     <description>
         Language used to define JPA query using the JPA model, which under the hood uses Querydsl to construct the predicate.
@@ -43,66 +48,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <rpg.version>0.13</rpg.version>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
-        <spring.version>5.2.5.RELEASE</spring.version>
-        <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+        <querydsl.version>4.3.1</querydsl.version>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>foundation.fluent.api</groupId>
-            <artifactId>rpg</artifactId>
-            <version>${rpg.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>foundation.fluent.api</groupId>
-            <artifactId>rpg-common</artifactId>
-            <version>${rpg.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-core</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>4.3.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>2.2.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring-boot.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>${spring-boot.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.194</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
 
     <licenses>
@@ -142,68 +90,24 @@
 
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${compiler.plugin.version}</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler.plugin.version}</version>
-                <executions>
-                    <!-- Replacing default-compile as it is treated specially by maven -->
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <!-- Replacing default-testCompile as it is treated specially by maven -->
-                    <execution>
-                        <id>default-testCompile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals><goal>compile</goal></goals>
-                        <configuration>
-                            <annotationProcessorPaths>
-                                <annotationProcessorPath>
-                                    <groupId>foundation.fluent.api</groupId>
-                                    <artifactId>rpg-apt</artifactId>
-                                    <version>${rpg.version}</version>
-                                </annotationProcessorPath>
-                            </annotationProcessorPaths>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals><goal>testCompile</goal></goals>
-                        <configuration>
-                            <annotationProcessorPaths>
-                                <annotationProcessorPath>
-                                    <groupId>com.querydsl</groupId>
-                                    <artifactId>querydsl-apt</artifactId>
-                                    <version>4.3.1</version>
-                                </annotationProcessorPath>
-                                <annotationProcessorPath>
-                                    <groupId>jakarta.persistence</groupId>
-                                    <artifactId>jakarta.persistence-api</artifactId>
-                                    <version>2.2.3</version>
-                                </annotationProcessorPath>
-                            </annotationProcessorPaths>
-                            <annotationProcessors>
-                                <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
-                            </annotationProcessors>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -95,4 +95,9 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         findAll("enumValue not in (VALUE1)", 1);
     }
 
+    @Test
+    public void testEmptyString() throws IOException {
+        findAll("", 2);
+    }
+
 }

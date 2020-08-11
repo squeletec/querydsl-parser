@@ -1,5 +1,6 @@
 package foundation.jpa.querydsl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Predicate;
 import foundation.rpg.parser.SyntaxError;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 
-public final class QueryContext {
+public class QueryContext {
 
     private final EntityConverter entityConverter;
     private final Map<String, Object> variables;
@@ -32,6 +33,8 @@ public final class QueryContext {
     }
 
     public Predicate parse(EntityPath<?> entityPath, String query) throws IOException, SyntaxError {
+        if(query == null || query.isEmpty())
+            return new BooleanBuilder().and(null);
         return new PredicateParser(new QueryFactory(entityConverter, variables, entityPath)).parseString(query);
     }
 
