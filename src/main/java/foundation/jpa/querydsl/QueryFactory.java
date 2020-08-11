@@ -10,7 +10,6 @@ import foundation.rpg.common.precedence.LogicalOr;
 import foundation.rpg.common.precedence.Relational;
 import foundation.rpg.common.rules.CommaSeparated;
 import foundation.rpg.common.symbols.*;
-import org.springframework.core.convert.ConversionService;
 
 import java.lang.Class;
 import java.lang.reflect.Field;
@@ -31,12 +30,12 @@ import static java.util.stream.Collectors.joining;
 @SuppressWarnings({"unused", "unchecked"})
 public class QueryFactory {
 
-    private final ConversionService conversionService;
+    private final EntityConverter entityConverter;
     private final Map<String, Object> variables;
     private final EntityPath<?> root;
 
-    public QueryFactory(ConversionService conversionService, Map<String, Object> variables, EntityPath<?> root) {
-        this.conversionService = conversionService;
+    public QueryFactory(EntityConverter entityConverter, Map<String, Object> variables, EntityPath<?> root) {
+        this.entityConverter = entityConverter;
         this.variables = variables;
         this.root = root;
     }
@@ -64,17 +63,17 @@ public class QueryFactory {
 
     @Relational BooleanExpression is (Expression leftOperand, Equal operator, Expression rightOperand) {
         if(leftOperand instanceof EntityPath && rightOperand instanceof Constant)
-            return resolve(Ops.EQ, leftOperand, rightOperand, conversionService);
+            return resolve(Ops.EQ, leftOperand, rightOperand, entityConverter);
         if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
-            return resolve(Ops.EQ, rightOperand, leftOperand, conversionService);
+            return resolve(Ops.EQ, rightOperand, leftOperand, entityConverter);
         return operation(Ops.EQ, leftOperand, rightOperand);
     }
 
     @Relational BooleanExpression is (Expression leftOperand, ExclEqual operator, Expression rightOperand) {
         if(leftOperand instanceof EntityPath && rightOperand instanceof Constant)
-            return resolve(Ops.NE, leftOperand, rightOperand, conversionService);
+            return resolve(Ops.NE, leftOperand, rightOperand, entityConverter);
         if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
-            return resolve(Ops.NE, rightOperand, leftOperand, conversionService);
+            return resolve(Ops.NE, rightOperand, leftOperand, entityConverter);
         return operation(Ops.NE, leftOperand, rightOperand);
     }
 
@@ -149,7 +148,7 @@ public class QueryFactory {
         Object[] arguments = parameters.stream().map(p -> p instanceof Constant ? ((Constant<?>) p).getConstant() : p).toArray();
         for(Method method : type.getMethods()) try {
             if(method.getName().equals(name) && method.getParameterCount() == size) {
-                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> conversionService.convert(arguments[i], method.getParameterTypes()[i])).toArray();
+                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> entityConverter.convert(arguments[i], method.getParameterTypes()[i])).toArray();
                 return method.invoke(object, a);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {

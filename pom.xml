@@ -42,6 +42,7 @@
     <url>https://github.com/c0stra/rpg/wiki/querydsl-parser</url>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <rpg.version>0.13</rpg.version>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
         <spring.version>5.2.5.RELEASE</spring.version>
@@ -63,11 +64,6 @@
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-core</artifactId>
             <version>4.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
