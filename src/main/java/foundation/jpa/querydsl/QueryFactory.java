@@ -3,7 +3,6 @@ package foundation.jpa.querydsl;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.ListPath;
 import foundation.rpg.Match;
 import foundation.rpg.StartSymbol;
 import foundation.rpg.common.precedence.LogicalAnd;
@@ -65,22 +64,34 @@ public class QueryFactory {
 
     @Relational BooleanExpression is (Expression leftOperand, Equal operator, Expression rightOperand) {
         if(leftOperand instanceof EntityPath && rightOperand instanceof Constant)
-            return resolve(leftOperand, rightOperand, conversionService);
+            return resolve(Ops.EQ, leftOperand, rightOperand, conversionService);
         if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
-            return resolve(rightOperand, leftOperand, conversionService);
+            return resolve(Ops.EQ, rightOperand, leftOperand, conversionService);
         return operation(Ops.EQ, leftOperand, rightOperand);
     }
 
-    @Relational BooleanExpression is (Expression operand, Is is, Null nul) {
+    @Relational BooleanExpression is (Expression leftOperand, ExclEqual operator, Expression rightOperand) {
+        if(leftOperand instanceof EntityPath && rightOperand instanceof Constant)
+            return resolve(Ops.NE, leftOperand, rightOperand, conversionService);
+        if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
+            return resolve(Ops.NE, rightOperand, leftOperand, conversionService);
+        return operation(Ops.NE, leftOperand, rightOperand);
+    }
+
+    @Relational BooleanExpression is (Expression operand, Is operator, Null nul) {
         return operation(Ops.IS_NULL, operand);
     }
 
-    @Relational BooleanExpression is (Expression operand, Not not, Null nul) {
+    @Relational BooleanExpression is (Expression operand, Not operator, Null nul) {
         return operation(Ops.IS_NOT_NULL, operand);
     }
 
-    @Relational BooleanExpression is (Expression leftOperand, In operator, LPar opening, @CommaSeparated List<Expression> rightOperands, RPar closing) {
+    @Relational BooleanExpression is (Expression leftOperand, In operator, LPar opening, @CommaSeparated List<Object> rightOperands, RPar closing) {
         return Expressions.asSimple(leftOperand).in(rightOperands);
+    }
+
+    @Relational BooleanExpression is (Expression leftOperand, Not negation, In operator, LPar opening, @CommaSeparated List<Object> rightOperands, RPar closing) {
+        return Expressions.asSimple(leftOperand).notIn(rightOperands);
     }
 
     @Relational BooleanExpression is (Expression leftOperand, Tilda operator, Expression rightOperand) {

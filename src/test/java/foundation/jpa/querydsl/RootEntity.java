@@ -7,15 +7,16 @@ import java.util.List;
 public class RootEntity {
 
     @Id
+    @GeneratedValue
     private long id;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<OneToManyEntity> oneToManyEntities;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<ManyToManyEntity> manyToManyEntities;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private ManyToOneEntity manyToOneEntity;
 
     private String name;
@@ -86,4 +87,5 @@ public class RootEntity {
         this.enumValue = enumValue;
         return this;
     }
+
 }
