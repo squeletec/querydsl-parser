@@ -51,8 +51,9 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
     private String query(MethodParameter methodParameter, NativeWebRequest nativeWebRequest) {
         String query = nativeWebRequest.getParameter("query");
-        if(methodParameter.hasParameterAnnotation(QueryCacheName.class)) {
-            String name = methodParameter.getParameterAnnotation(QueryCacheName.class).value();
+        if(methodParameter.hasParameterAnnotation(CacheQuery.class)) {
+            String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
+            String name = methodParameter.getParameterAnnotation(CacheQuery.class).value() + typeName;
             if(isNull(query)) {
                 // Load from session
                 query = (String) nativeWebRequest.getAttribute(name, WebRequest.SCOPE_SESSION);
