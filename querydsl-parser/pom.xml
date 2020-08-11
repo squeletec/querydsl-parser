@@ -11,7 +11,6 @@
 
     <properties>
         <rpg.version>0.13</rpg.version>
-        <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -30,6 +29,8 @@
             <artifactId>querydsl-core</artifactId>
             <version>${querydsl.version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -122,10 +123,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
         </plugins>
     </build>
