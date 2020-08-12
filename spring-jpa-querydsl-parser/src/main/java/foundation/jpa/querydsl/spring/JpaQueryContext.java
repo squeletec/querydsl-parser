@@ -17,6 +17,10 @@ public class JpaQueryContext extends QueryContext {
         super(conversionService::convert, enumValues(entityManager.getMetamodel().getEntities()));
     }
 
+    public JpaQueryContext(EntityManager entityManager) {
+        super((o, c) -> entityManager.find(c, o), enumValues(entityManager.getMetamodel().getEntities()));
+    }
+
     public static Map<String, Object> enumValues(Set<EntityType<?>> entities) {
         Map<String, Object> variables = new LinkedHashMap<>();
         entities.stream().flatMap(e -> e.getAttributes().stream()).map(Attribute::getJavaType).filter(Class::isEnum)

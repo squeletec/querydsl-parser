@@ -1,10 +1,8 @@
 package foundation.jpa.querydsl.spring;
 
-import foundation.jpa.querydsl.QueryContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,16 +18,12 @@ public class SearchApplication implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(searchParameterHandler(null, null));
+        resolvers.add(searchParameterHandler(null));
     }
 
     @Bean
-    public SearchParameterHandler searchParameterHandler(EntityManager entityManager, QueryContext queryContext) {
-        return new SearchParameterHandler(entityManager, queryContext);
+    public SearchParameterHandler searchParameterHandler(EntityManager manager) {
+        return new SearchParameterHandler(manager);
     }
 
-    @Bean
-    public QueryContext queryContext(ConversionService conversionService, EntityManager entityManager) {
-        return new JpaQueryContext(conversionService, entityManager);
-    }
 }

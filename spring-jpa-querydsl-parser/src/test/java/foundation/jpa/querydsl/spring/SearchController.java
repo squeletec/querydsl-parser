@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SearchController {
 
     @GetMapping("/search")
-    public Search<RootEntity, QRootEntity> search(Search<RootEntity, QRootEntity> result) {
+    public Search<RootEntity, QRootEntity> search(@CacheQuery @DefaultQuery("name='A'") Search<RootEntity, QRootEntity> result) {
         return result;
     }
 

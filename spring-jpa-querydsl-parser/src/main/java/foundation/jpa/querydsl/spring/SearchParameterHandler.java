@@ -2,6 +2,7 @@ package foundation.jpa.querydsl.spring;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
@@ -24,15 +24,20 @@ import javax.persistence.EntityManager;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.springframework.web.context.request.RequestAttributes.SCOPE_SESSION;
 
 public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
-    private final EntityManager entityManager;
+    private final JPAQueryFactory factory;
     private final QueryContext queryContext;
 
-    public SearchParameterHandler(EntityManager entityManager, QueryContext queryContext) {
-        this.entityManager = entityManager;
+    public SearchParameterHandler(EntityManager manager, QueryContext queryContext) {
+        this.factory = new JPAQueryFactory(manager);
         this.queryContext = queryContext;
+    }
+
+    public SearchParameterHandler(EntityManager manger) {
+        this(manger, new JpaQueryContext(manger));
     }
 
     @Override
@@ -51,15 +56,17 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
     private String query(MethodParameter methodParameter, NativeWebRequest nativeWebRequest) {
         String query = nativeWebRequest.getParameter("query");
+        if("delete".equals(nativeWebRequest.getParameter("cache")))
         if(methodParameter.hasParameterAnnotation(CacheQuery.class)) {
             String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
             String name = methodParameter.getParameterAnnotation(CacheQuery.class).value() + typeName;
+            nativeWebRequest.removeAttribute(name, SCOPE_SESSION);
             if(isNull(query)) {
                 // Load from session
-                query = (String) nativeWebRequest.getAttribute(name, WebRequest.SCOPE_SESSION);
+                query = (String) nativeWebRequest.getAttribute(name, SCOPE_SESSION);
             } else {
                 // Store in session
-                nativeWebRequest.setAttribute(name, query, WebRequest.SCOPE_SESSION);
+                nativeWebRequest.setAttribute(name, query, SCOPE_SESSION);
             }
         }
         if(isNull(query)) {
@@ -72,8 +79,8 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
     }
 
     private <E, Q extends EntityPath<E>> Search<E, Q> execute(EntityPath<E> type, String query, Pageable pageable, URI uri, ImplicitQuery implicitQuery) {
-        try {
-            JPAQuery<E> jpaQuery = new JPAQuery<E>(entityManager).from(type);
+        try {factory.selectFrom(type).where().fetchOne();
+            JPAQuery<E> jpaQuery = factory.selectFrom(type);
             if(nonNull(implicitQuery)) {
                 jpaQuery.where(queryContext.parse(type, implicitQuery.value()));
             }

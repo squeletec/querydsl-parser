@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface ImplicitQuery {
 
-    String value() default "";
+    String value();
 
 }
