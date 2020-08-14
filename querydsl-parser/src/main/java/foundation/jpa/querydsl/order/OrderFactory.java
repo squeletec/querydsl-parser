@@ -26,12 +26,12 @@ public class OrderFactory {
     }
 
     @StartSymbol(parserClassName = "OrderByParser", lexerClassName = "OrderByLexer")
-    Order[] is() {
-        return new Order[]{};
+    OrderSpecifier<?>[] is() {
+        return new OrderSpecifier<?>[]{};
     }
 
-    Order[] is(@NonEmpty List<OrderSpecifier<?>> list) {
-        return list.stream().map(OrderSpecifier::getOrder).toArray(Order[]::new);
+    OrderSpecifier<?>[] is(@NonEmpty List<OrderSpecifier<?>> list) {
+        return list.toArray(new OrderSpecifier<?>[]{});
     }
 
     OrderSpecifier<?>  is(Path<?> expression) {

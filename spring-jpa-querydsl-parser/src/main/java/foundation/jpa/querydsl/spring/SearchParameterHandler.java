@@ -1,6 +1,8 @@
 package foundation.jpa.querydsl.spring;
 
 import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryContext;
@@ -50,53 +52,56 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        String query = query(methodParameter, nativeWebRequest);
+        CacheQuery cacheQuery = methodParameter.getParameterAnnotation(CacheQuery.class);
+        String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
+        String query = get(nativeWebRequest, "query", cacheQuery, typeName, defaultQuery(methodParameter));
+        String sort = get(nativeWebRequest, "sort", cacheQuery, typeName, defaultSort(methodParameter));
         Pageable pageable = pageable(methodParameter.getMethodAnnotation(PageableDefault.class), nativeWebRequest);
-        return execute(getEntityPath(methodParameter), query, pageable, URI.create(""), methodParameter.getParameterAnnotation(ImplicitQuery.class));
+        return execute(getEntityPath(methodParameter), query, sort, pageable, URI.create(""), methodParameter.getParameterAnnotation(ImplicitQuery.class));
     }
 
+    private String defaultQuery(MethodParameter methodParameter) {
+        return methodParameter.hasParameterAnnotation(DefaultQuery.class) ? methodParameter.getParameterAnnotation(DefaultQuery.class).value() : "";
+    }
 
+    private String defaultSort(MethodParameter methodParameter) {
+        return methodParameter.hasParameterAnnotation(DefaultSort.class) ? methodParameter.getParameterAnnotation(DefaultSort.class).value() : "";
+    }
 
-    private String query(MethodParameter methodParameter, NativeWebRequest nativeWebRequest) {
-        String query = nativeWebRequest.getParameter("query");
-        if("delete".equals(nativeWebRequest.getParameter("cache")))
-        if(methodParameter.hasParameterAnnotation(CacheQuery.class)) {
-            String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
-            String name = methodParameter.getParameterAnnotation(CacheQuery.class).value() + typeName;
-            nativeWebRequest.removeAttribute(name, SCOPE_SESSION);
-            if(isNull(query)) {
-                // Load from session
-                query = (String) nativeWebRequest.getAttribute(name, SCOPE_SESSION);
-            } else {
-                // Store in session
-                nativeWebRequest.setAttribute(name, query, SCOPE_SESSION);
-            }
+    private String get(NativeWebRequest nativeWebRequest, String name, CacheQuery cacheQuery, String typeName, String defaultValue) {
+        String value = nativeWebRequest.getParameter(name);
+        if(nonNull(cacheQuery)) {
+            String cacheKey = name + ":" + cacheQuery.value() + typeName;
+            if("delete".equals(nativeWebRequest.getParameter("cache")))
+                nativeWebRequest.removeAttribute(cacheKey, SCOPE_SESSION);
+            if(isNull(value))
+                value = (String) nativeWebRequest.getAttribute(cacheKey, SCOPE_SESSION);
+            else
+                nativeWebRequest.setAttribute(cacheKey, value, SCOPE_SESSION);
         }
-        if(isNull(query)) {
-            DefaultQuery defaultQuery = methodParameter.getParameterAnnotation(DefaultQuery.class);
-            if(nonNull(defaultQuery)) {
-                query = defaultQuery.value();
-            }
-        }
-        return query;
+        if(isNull(value))
+            value = defaultValue;
+        return value;
     }
 
-    private <E> void sort(EntityPath<E> path, String sort) throws IOException {
-        new OrderByParser(new OrderFactory(path)).parseString(sort);
+    private <E> OrderSpecifier<?>[] sort(EntityPath<E> path, String sort) throws IOException {
+        return new OrderByParser(new OrderFactory(path)).parseString(sort);
     }
 
-    private <E, Q extends EntityPath<E>> Search<E, Q> execute(EntityPath<E> type, String query, Pageable pageable, URI uri, ImplicitQuery implicitQuery) {
+    private <E, Q extends EntityPath<E>> Search<E, Q> execute(EntityPath<E> type, String query, String sort, Pageable pageable, URI uri, ImplicitQuery implicitQuery) {
         try {factory.selectFrom(type).where().fetchOne();
             JPAQuery<E> jpaQuery = factory.selectFrom(type);
             if(nonNull(implicitQuery)) {
                 jpaQuery.where(queryContext.parse(type, implicitQuery.value()));
             }
-            jpaQuery = jpaQuery.where(queryContext.parse(type, query)).offset(pageable.getOffset()).limit(pageable.getPageSize());
+            Predicate predicate = queryContext.parse(type, query);
+            OrderSpecifier<?>[] specifiers = sort(type, sort);
+            jpaQuery = jpaQuery.where(predicate).orderBy(specifiers).offset(pageable.getOffset()).limit(pageable.getPageSize());
             long count = jpaQuery.fetchCount();
             List<E> data = jpaQuery.fetch();
-            return Search.search(query, new PageImpl<>(data, pageable, count), null, uri);
+            return Search.search(query, sort, predicate, specifiers, new PageImpl<>(data, pageable, count), null, uri);
         } catch (Throwable e) {
-            return Search.search(query, Page.empty(), e, uri);
+            return Search.search(query, sort, null, null, Page.empty(), e, uri);
         }
     }
 
