@@ -10,7 +10,7 @@
     <artifactId>querydsl-parser</artifactId>
 
     <properties>
-        <rpg.version>0.13</rpg.version>
+        <rpg.version>0.14</rpg.version>
     </properties>
 
     <dependencies>

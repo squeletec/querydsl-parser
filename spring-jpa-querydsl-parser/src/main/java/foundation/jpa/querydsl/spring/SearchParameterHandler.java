@@ -4,6 +4,8 @@ import com.querydsl.core.types.EntityPath;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryContext;
+import foundation.jpa.querydsl.order.OrderByParser;
+import foundation.jpa.querydsl.order.OrderFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +17,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -76,6 +79,10 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
             }
         }
         return query;
+    }
+
+    private <E> void sort(EntityPath<E> path, String sort) throws IOException {
+        new OrderByParser(new OrderFactory(path)).parseString(sort);
     }
 
     private <E, Q extends EntityPath<E>> Search<E, Q> execute(EntityPath<E> type, String query, Pageable pageable, URI uri, ImplicitQuery implicitQuery) {
