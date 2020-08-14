@@ -89,7 +89,7 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
     }
 
     private <E, Q extends EntityPath<E>> Search<E, Q> execute(EntityPath<E> type, String query, String sort, Pageable pageable, URI uri, ImplicitQuery implicitQuery) {
-        try {factory.selectFrom(type).where().fetchOne();
+        try {
             JPAQuery<E> jpaQuery = factory.selectFrom(type);
             if(nonNull(implicitQuery)) {
                 jpaQuery.where(queryContext.parse(type, implicitQuery.value()));
@@ -116,7 +116,7 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
 
     private Pageable pageable(PageableDefault pageableDefault, NativeWebRequest request) {
-        int page = 1;
+        int page = 0;
         int size = 10;
         if(nonNull(pageableDefault)) {
             page = pageableDefault.page();
