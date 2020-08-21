@@ -2,7 +2,10 @@ package foundation.jpa.querydsl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import foundation.jpa.querydsl.order.OrderByParser;
+import foundation.jpa.querydsl.order.OrderFactory;
 import foundation.rpg.parser.SyntaxError;
 
 import java.io.IOException;
@@ -38,4 +41,9 @@ public class QueryContext {
         return new PredicateParser(new QueryFactory(entityConverter, variables, entityPath)).parseString(query);
     }
 
+    public OrderSpecifier<?>[] parseOrderSpecifier(EntityPath<?> entityPath, String orderBy) throws IOException {
+        if(orderBy == null)
+            return new OrderSpecifier[0];
+        return new OrderByParser(new OrderFactory(entityPath)).parseString(orderBy);
+    }
 }
