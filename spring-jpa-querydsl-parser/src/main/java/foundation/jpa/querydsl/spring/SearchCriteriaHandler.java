@@ -1,16 +1,8 @@
 package foundation.jpa.querydsl.spring;
 
 import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import foundation.jpa.querydsl.QueryContext;
-import foundation.jpa.querydsl.order.OrderByParser;
-import foundation.jpa.querydsl.order.OrderFactory;
+import foundation.jpa.querydsl.spring.impl.SearchCriteriaImpl;
 import org.springframework.core.MethodParameter;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,22 +11,15 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.net.URI;
-import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.springframework.web.context.request.RequestAttributes.SCOPE_SESSION;
 
-public class SearchParameterHandler implements HandlerMethodArgumentResolver {
+public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
 
-    private final JPAQueryFactory factory;
-    private final QueryContext queryContext;
     private final String queryParameterName;
     private final String sortParameterName;
     private final String pageParameterName;
@@ -42,16 +27,12 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
     private final int defaultPageSize;
     private final int defaultPage;
 
-    public SearchParameterHandler(EntityManager manager,
-                                  QueryContext queryContext,
-                                  String queryParameterName,
-                                  String sortParameterName,
-                                  String pageParameterName,
-                                  String sizeParameterName,
-                                  int defaultPageSize,
-                                  int defaultPage) {
-        this.factory = new JPAQueryFactory(manager);
-        this.queryContext = queryContext;
+    public SearchCriteriaHandler(String queryParameterName,
+                                 String sortParameterName,
+                                 String pageParameterName,
+                                 String sizeParameterName,
+                                 int defaultPageSize,
+                                 int defaultPage) {
         this.queryParameterName = queryParameterName;
         this.sortParameterName = sortParameterName;
         this.pageParameterName = pageParameterName;
@@ -62,17 +43,20 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter methodParameter) {
-        return Search.class.equals(methodParameter.getParameterType());
+        return SearchCriteria.class.equals(methodParameter.getParameterType());
     }
 
     @Override
-    public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
+    public SearchCriteria<? extends EntityPath<?>> resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         CacheQuery cacheQuery = methodParameter.getParameterAnnotation(CacheQuery.class);
         String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
-        String query = get(nativeWebRequest, queryParameterName, cacheQuery, typeName, defaultQuery(methodParameter));
-        String sort = get(nativeWebRequest, sortParameterName, cacheQuery, typeName, defaultSort(methodParameter));
-        Pageable pageable = pageable(methodParameter.getMethodAnnotation(PageableDefault.class), nativeWebRequest);
-        return execute(getEntityPath(methodParameter), query, sort, pageable, URI.create(""), methodParameter.getParameterAnnotation(ImplicitQuery.class));
+        return new SearchCriteriaImpl<>(
+                methodParameter.hasParameterAnnotation(ImplicitQuery.class) ? methodParameter.getParameterAnnotation(ImplicitQuery.class).value() : null,
+                get(nativeWebRequest, queryParameterName, cacheQuery, typeName, defaultQuery(methodParameter)),
+                get(nativeWebRequest, sortParameterName, cacheQuery, typeName, defaultSort(methodParameter)),
+                pageable(methodParameter.getMethodAnnotation(PageableDefault.class), nativeWebRequest),
+                getEntityPath(methodParameter)
+        );
     }
 
     private String defaultQuery(MethodParameter methodParameter) {
@@ -99,30 +83,8 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
         return value;
     }
 
-    private <E> OrderSpecifier<?>[] sort(EntityPath<E> path, String sort) throws IOException {
-        return new OrderByParser(new OrderFactory(path)).parseString(sort);
-    }
-
-    private <E, Q extends EntityPath<E>> Search<E, Q> execute(EntityPath<E> type, String query, String sort, Pageable pageable, URI uri, ImplicitQuery implicitQuery) {
-        try {
-            JPAQuery<E> jpaQuery = factory.selectFrom(type);
-            if(nonNull(implicitQuery)) {
-                jpaQuery.where(queryContext.parse(type, implicitQuery.value()));
-            }
-            Predicate predicate = queryContext.parse(type, query);
-            OrderSpecifier<?>[] specifiers = sort(type, sort);
-            jpaQuery = jpaQuery.where(predicate).orderBy(specifiers).offset(pageable.getOffset()).limit(pageable.getPageSize());
-            long count = jpaQuery.fetchCount();
-            List<E> data = jpaQuery.fetch();
-            return Search.search(query, sort, predicate, specifiers, new PageImpl<>(data, pageable, count), null, uri);
-        } catch (Throwable e) {
-            return Search.search(query, sort, null, null, Page.empty(), e, uri);
-        }
-    }
-
-
     private <E> EntityPath<E> getEntityPath(MethodParameter parameter) throws IllegalAccessException {
-        Class<?> entityPathClass = (Class<?>) ((ParameterizedType) parameter.getGenericParameterType()).getActualTypeArguments()[1];
+        Class<?> entityPathClass = (Class<?>) ((ParameterizedType) parameter.getGenericParameterType()).getActualTypeArguments()[0];
         for(Field field : entityPathClass.getFields())
             if(entityPathClass.equals(field.getType()))
                 return (EntityPath<E>) field.get(null);
