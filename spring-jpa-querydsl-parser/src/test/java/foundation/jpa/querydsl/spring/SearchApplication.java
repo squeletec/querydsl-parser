@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static foundation.jpa.querydsl.spring.SearchParameterHandlerBuilder.searchParameterHandlerBuilder;
 import static java.util.Arrays.asList;
 
 @SpringBootApplication
@@ -26,7 +27,7 @@ public class SearchApplication implements WebMvcConfigurer {
 
     @Bean
     public SearchParameterHandler searchParameterHandler(EntityManager manager) {
-        return new SearchParameterHandler(manager);
+        return searchParameterHandlerBuilder(manager).build();
     }
 
     @Bean

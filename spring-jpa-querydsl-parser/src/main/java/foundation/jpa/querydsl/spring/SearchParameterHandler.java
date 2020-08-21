@@ -35,14 +35,29 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
     private final JPAQueryFactory factory;
     private final QueryContext queryContext;
+    private final String queryParameterName;
+    private final String sortParameterName;
+    private final String pageParameterName;
+    private final String sizeParameterName;
+    private final int defaultPageSize;
+    private final int defaultPage;
 
-    public SearchParameterHandler(EntityManager manager, QueryContext queryContext) {
+    public SearchParameterHandler(EntityManager manager,
+                                  QueryContext queryContext,
+                                  String queryParameterName,
+                                  String sortParameterName,
+                                  String pageParameterName,
+                                  String sizeParameterName,
+                                  int defaultPageSize,
+                                  int defaultPage) {
         this.factory = new JPAQueryFactory(manager);
         this.queryContext = queryContext;
-    }
-
-    public SearchParameterHandler(EntityManager manger) {
-        this(manger, new JpaQueryContext(manger));
+        this.queryParameterName = queryParameterName;
+        this.sortParameterName = sortParameterName;
+        this.pageParameterName = pageParameterName;
+        this.sizeParameterName = sizeParameterName;
+        this.defaultPageSize = defaultPageSize;
+        this.defaultPage = defaultPage;
     }
 
     @Override
@@ -54,8 +69,8 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         CacheQuery cacheQuery = methodParameter.getParameterAnnotation(CacheQuery.class);
         String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
-        String query = get(nativeWebRequest, "query", cacheQuery, typeName, defaultQuery(methodParameter));
-        String sort = get(nativeWebRequest, "sort", cacheQuery, typeName, defaultSort(methodParameter));
+        String query = get(nativeWebRequest, queryParameterName, cacheQuery, typeName, defaultQuery(methodParameter));
+        String sort = get(nativeWebRequest, sortParameterName, cacheQuery, typeName, defaultSort(methodParameter));
         Pageable pageable = pageable(methodParameter.getMethodAnnotation(PageableDefault.class), nativeWebRequest);
         return execute(getEntityPath(methodParameter), query, sort, pageable, URI.create(""), methodParameter.getParameterAnnotation(ImplicitQuery.class));
     }
@@ -116,17 +131,17 @@ public class SearchParameterHandler implements HandlerMethodArgumentResolver {
 
 
     private Pageable pageable(PageableDefault pageableDefault, NativeWebRequest request) {
-        int page = 0;
-        int size = 10;
+        int page = defaultPage;
+        int size = defaultPageSize;
         if(nonNull(pageableDefault)) {
             page = pageableDefault.page();
             size = pageableDefault.size();
         }
-        if(nonNull(request.getParameter("page"))) {
-            page = Integer.parseInt(request.getParameter("page"));
+        if(nonNull(request.getParameter(pageParameterName))) {
+            page = Integer.parseInt(request.getParameter(pageParameterName));
         }
-        if(nonNull(request.getParameter("size"))) {
-            size = Integer.parseInt(request.getParameter("size"));
+        if(nonNull(request.getParameter(sizeParameterName))) {
+            size = Integer.parseInt(request.getParameter(sizeParameterName));
         }
         return PageRequest.of(page, size);
     }
