@@ -1,4 +1,4 @@
-package foundation.jpa.querydsl.spring;
+package foundation.jpa.querydsl.spring.testapp;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

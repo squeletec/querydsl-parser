@@ -1,5 +1,6 @@
-package foundation.jpa.querydsl.spring;
+package foundation.jpa.querydsl.spring.testapp;
 
+import foundation.jpa.querydsl.spring.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

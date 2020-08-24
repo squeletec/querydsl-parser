@@ -1,4 +1,4 @@
-package foundation.jpa.querydsl.spring;
+package foundation.jpa.querydsl.spring.testapp;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

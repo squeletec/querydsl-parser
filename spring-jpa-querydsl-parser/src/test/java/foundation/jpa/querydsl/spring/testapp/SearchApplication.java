@@ -1,16 +1,10 @@
-package foundation.jpa.querydsl.spring;
+package foundation.jpa.querydsl.spring.testapp;
 
-import foundation.jpa.querydsl.spring.impl.SearchEngineImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.persistence.EntityManager;
-import java.util.List;
-
-import static foundation.jpa.querydsl.spring.SearchCriteriaHandlerBuilder.defaultCriteriaHandlerBuilder;
 import static java.util.Arrays.asList;
 
 @SpringBootApplication
@@ -18,27 +12,6 @@ public class SearchApplication implements WebMvcConfigurer {
 
     public static void main(String... args) {
         SpringApplication.run(SearchApplication.class);
-    }
-
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(searchParameterHandler(null, null));
-        resolvers.add(searchCriteriaHandler());
-    }
-
-    @Bean
-    public SearchCriteriaHandler searchCriteriaHandler() {
-        return defaultCriteriaHandlerBuilder();
-    }
-
-    @Bean
-    public SearchHandler searchParameterHandler(SearchCriteriaHandler searchCriteriaHandler, SearchEngine engine) {
-        return new SearchHandler(searchCriteriaHandler, engine);
-    }
-
-    @Bean
-    public SearchEngine searchEngine(EntityManager entityManager) {
-        return new SearchEngineImpl(entityManager);
     }
 
     @Bean
