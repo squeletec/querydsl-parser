@@ -51,7 +51,6 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
         CacheQuery cacheQuery = methodParameter.getParameterAnnotation(CacheQuery.class);
         String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
         return new SearchCriteriaImpl<>(
-                methodParameter.hasParameterAnnotation(ImplicitQuery.class) ? methodParameter.getParameterAnnotation(ImplicitQuery.class).value() : null,
                 get(nativeWebRequest, queryParameterName, cacheQuery, typeName, defaultQuery(methodParameter)),
                 get(nativeWebRequest, sortParameterName, cacheQuery, typeName, defaultSort(methodParameter)),
                 pageable(methodParameter.getMethodAnnotation(PageableDefault.class), nativeWebRequest),

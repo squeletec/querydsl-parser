@@ -8,28 +8,16 @@ import static java.util.Objects.nonNull;
 
 public class SearchCriteriaImpl<Q extends EntityPath<?>> implements SearchCriteria<Q> {
 
-    private final String implicitQuery;
     private final String query;
     private final String sort;
     private final Pageable pageable;
     private final Q entityPath;
 
-    public SearchCriteriaImpl(String implicitQuery, String query, String sort, Pageable pageable, Q entityPath) {
-        this.implicitQuery = implicitQuery;
+    public SearchCriteriaImpl(String query, String sort, Pageable pageable, Q entityPath) {
         this.query = query;
         this.sort = sort;
         this.pageable = pageable;
         this.entityPath = entityPath;
-    }
-
-    @Override
-    public boolean hasImplicitQuery() {
-        return nonNull(implicitQuery);
-    }
-
-    @Override
-    public String getImplicitQuery() {
-        return implicitQuery;
     }
 
     @Override

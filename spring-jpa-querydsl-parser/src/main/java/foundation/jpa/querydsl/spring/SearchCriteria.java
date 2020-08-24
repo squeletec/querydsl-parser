@@ -6,10 +6,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface SearchCriteria<E extends EntityPath<?>> {
 
-    boolean hasImplicitQuery();
-
-    String getImplicitQuery();
-
     String getQuery();
 
     String getSort();

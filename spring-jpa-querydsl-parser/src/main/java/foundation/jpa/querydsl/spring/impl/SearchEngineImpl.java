@@ -1,6 +1,7 @@
 package foundation.jpa.querydsl.spring.impl;
 
 import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryContext;
@@ -28,9 +29,17 @@ public class SearchEngineImpl implements SearchEngine {
     }
 
     public <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria) {
+        return search(criteria, queryFactory.selectFrom(criteria.getEntityPath()));
+    }
+
+    @Override
+    public <E> SearchResult<E> search(Predicate implicitPredicate, SearchCriteria<? extends EntityPath<E>> criteria) {
+        return search(criteria, queryFactory.selectFrom(criteria.getEntityPath()).where(implicitPredicate));
+    }
+
+    private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, JPAQuery<E> jpaQuery) {
         try {
-            JPAQuery<E> query = queryFactory.selectFrom(criteria.getEntityPath())
-                    .where(queryContext.parse(criteria.getEntityPath(), criteria.getQuery()))
+            JPAQuery<E> query = jpaQuery.where(queryContext.parse(criteria.getEntityPath(), criteria.getQuery()))
                     .orderBy(queryContext.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());
@@ -39,5 +48,4 @@ public class SearchEngineImpl implements SearchEngine {
             return new SearchResultImpl<>(criteria, Page.empty(), e);
         }
     }
-
 }
