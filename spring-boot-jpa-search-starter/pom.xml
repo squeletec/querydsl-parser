@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>querydsl-parser-project</artifactId>
         <groupId>foundation.fluent.api</groupId>
@@ -7,35 +9,25 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>spring-jpa-querydsl-parser</artifactId>
+    <artifactId>spring-boot-jpa-search-starter</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>foundation.fluent.api</groupId>
-            <artifactId>querydsl-parser</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>spring-jpa-search</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>${querydsl.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>5.2.5.RELEASE</version>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-            <version>2.2.4.RELEASE</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>2.2.3</version>
-            <scope>compile</scope>
-        </dependency>
+
 
         <dependency>
             <groupId>org.testng</groupId>
@@ -68,29 +60,9 @@
             <version>1.4.194</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.10.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>5.2.5.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>5.2.5.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
 
     </dependencies>
+
 
 
     <build>

@@ -1,5 +1,8 @@
-package foundation.jpa.querydsl.spring;
+package foundation.jpa.querydsl.spring.autoconfigure;
 
+import foundation.jpa.querydsl.spring.SearchCriteriaHandler;
+import foundation.jpa.querydsl.spring.SearchEngine;
+import foundation.jpa.querydsl.spring.SearchHandler;
 import foundation.jpa.querydsl.spring.impl.SearchEngineImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
