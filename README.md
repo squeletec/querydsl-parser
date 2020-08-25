@@ -1,6 +1,5 @@
 # Querydsl parser
 [![Released version](https://img.shields.io/maven-central/v/foundation.fluent.api/querydsl-parser.svg)](https://search.maven.org/#search%7Cga%7C1%7Cquerydsl-parser)
-[![Build Status](https://travis-ci.org/c0stra/querydsl-parser.svg?branch=master)](https://travis-ci.org/c0stra/querydsl-parser)
 
 Yet another approach to allow users to query data modelled via JPA safely.
 
@@ -99,7 +98,7 @@ In order to be able to use this parser use following maven dependency:
 <dependency>
     <groupId>foundation.fluent.api</groupId>
     <artifactId>querydsl-parser</artifactId>
-    <version>0.3</version>
+    <version>0.8</version>
 </dependency>
 ```
 
