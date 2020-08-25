@@ -5,9 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import foundation.rpg.Match;
 import foundation.rpg.StartSymbol;
-import foundation.rpg.common.precedence.LogicalAnd;
-import foundation.rpg.common.precedence.LogicalOr;
-import foundation.rpg.common.precedence.Relational;
+import foundation.rpg.common.precedence.*;
 import foundation.rpg.common.rules.CommaSeparated;
 import foundation.rpg.common.symbols.*;
 
@@ -97,19 +95,63 @@ public class QueryFactory {
         return operation(Ops.LIKE, leftOperand, rightOperand);
     }
 
+    @Relational BooleanExpression is(Expression leftOperand, Gt operator, Expression rightOperand) {
+        return operation(Ops.GT, leftOperand, rightOperand);
+    }
+
+    @Relational BooleanExpression is(Expression leftOperand, Lt operator, Expression rightOperand) {
+        return operation(Ops.LT, leftOperand, rightOperand);
+    }
+
+    @Relational BooleanExpression is(Expression leftOperand, GtEqual operator, Expression rightOperand) {
+        return operation(Ops.GOE, leftOperand, rightOperand);
+    }
+
+    @Relational BooleanExpression is(Expression leftOperand, LtEqual operator, Expression rightOperand) {
+        return operation(Ops.LOE, leftOperand, rightOperand);
+    }
+
     @Relational BooleanExpression is (Expression expression) {
         return Expressions.asBoolean(expression);
     }
 
-    Expression is (@Match(DOUBLE) Double value) {
+    Expression is1 (@Additive Expression expression) {
+        return expression;
+    }
+
+    @Additive Expression is (@Additive Expression leftOperand, Plus operator, @Multiplicative Expression rightOperand) {
+        return operation(Ops.ADD, leftOperand, rightOperand);
+    }
+
+    @Additive Expression is (@Additive Expression leftOperand, Minus operator, @Multiplicative Expression rightOperand) {
+        return operation(Ops.SUB, leftOperand, rightOperand);
+    }
+
+    @Multiplicative Expression is (@Multiplicative Expression leftOperand, Star operator, @Unary Expression rightOperand) {
+        return operation(Ops.MULT, leftOperand, rightOperand);
+    }
+
+    @Multiplicative Expression is (@Multiplicative Expression leftOperand, Sl operator, @Unary Expression rightOperand) {
+        return operation(Ops.DIV, leftOperand, rightOperand);
+    }
+
+    @Unary Expression is(Minus operator, @Unary Expression operand) {
+        return operation(Ops.NEGATE, operand);
+    }
+
+    @Unary Expression is2 (@Atomic Expression expression) {
+        return expression;
+    }
+
+    Object is (@Match(DOUBLE) Double value) {
         return constant(value);
     }
 
-    Expression is (@Match(INTEGER) Integer value) {
+    Object is (@Match(INTEGER) Integer value) {
         return constant(value);
     }
 
-    Expression is (@Match(QUOTED_STRING) String value) {
+    Object is (@Match(QUOTED_STRING) String value) {
         return constant(value.substring(1, value.length() - 1));
     }
 
@@ -123,7 +165,7 @@ public class QueryFactory {
         return is(root, null, identifier, opening, parameters, closing);
     }
 
-    Expression is (Object object) {
+    @Atomic Expression is (Object object) {
         return object instanceof Expression ? (Expression) object : constant(object);
     }
 
