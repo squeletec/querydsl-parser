@@ -2,12 +2,13 @@ package foundation.jpa.querydsl;
 
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import foundation.rpg.Match;
+import foundation.rpg.Name;
 import foundation.rpg.StartSymbol;
 import foundation.rpg.common.precedence.*;
 import foundation.rpg.common.rules.CommaSeparated;
 import foundation.rpg.common.symbols.*;
+import foundation.rpg.parser.Token;
 
 import java.lang.Class;
 import java.lang.reflect.Field;
@@ -19,9 +20,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.querydsl.core.types.dsl.Expressions.constant;
-import static foundation.jpa.querydsl.QueryUtils.operation;
-import static foundation.jpa.querydsl.QueryUtils.resolve;
+import static com.querydsl.core.types.dsl.Expressions.*;
+import static foundation.jpa.querydsl.QueryUtils.*;
 import static foundation.rpg.common.Patterns.*;
 import static java.util.stream.Collectors.joining;
 
@@ -60,59 +60,51 @@ public class QueryFactory {
     }
 
     @Relational BooleanExpression is (Expression leftOperand, Equal operator, Expression rightOperand) {
-        if(leftOperand instanceof EntityPath && rightOperand instanceof Constant)
-            return resolve(Ops.EQ, leftOperand, rightOperand, entityConverter);
-        if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
-            return resolve(Ops.EQ, rightOperand, leftOperand, entityConverter);
-        return operation(Ops.EQ, leftOperand, rightOperand);
+        return resolveOperation(Ops.EQ, leftOperand, rightOperand, entityConverter);
     }
 
     @Relational BooleanExpression is (Expression leftOperand, ExclEqual operator, Expression rightOperand) {
-        if(leftOperand instanceof EntityPath && rightOperand instanceof Constant)
-            return resolve(Ops.NE, leftOperand, rightOperand, entityConverter);
-        if(rightOperand instanceof EntityPath && leftOperand instanceof Constant)
-            return resolve(Ops.NE, rightOperand, leftOperand, entityConverter);
-        return operation(Ops.NE, leftOperand, rightOperand);
+        return resolveOperation(Ops.NE, leftOperand, rightOperand, entityConverter);
     }
 
     @Relational BooleanExpression is (Expression operand, Is operator, Null nul) {
-        return operation(Ops.IS_NULL, operand);
+        return asSimple(operand).isNull();
     }
 
     @Relational BooleanExpression is (Expression operand, Not operator, Null nul) {
-        return operation(Ops.IS_NOT_NULL, operand);
+        return asSimple(operand).isNotNull();
     }
 
     @Relational BooleanExpression is (Expression leftOperand, In operator, LPar opening, @CommaSeparated List<Object> rightOperands, RPar closing) {
-        return Expressions.asSimple(leftOperand).in(rightOperands);
+        return asSimple(leftOperand).in(rightOperands);
     }
 
     @Relational BooleanExpression is (Expression leftOperand, Not negation, In operator, LPar opening, @CommaSeparated List<Object> rightOperands, RPar closing) {
-        return Expressions.asSimple(leftOperand).notIn(rightOperands);
+        return asSimple(leftOperand).notIn(rightOperands);
     }
 
     @Relational BooleanExpression is (Expression leftOperand, Tilda operator, Expression rightOperand) {
-        return operation(Ops.LIKE, leftOperand, rightOperand);
+        return asString(leftOperand).like(rightOperand);
     }
 
     @Relational BooleanExpression is(Expression leftOperand, Gt operator, Expression rightOperand) {
-        return operation(Ops.GT, leftOperand, rightOperand);
+        return asComparable(leftOperand).gt(rightOperand);
     }
 
     @Relational BooleanExpression is(Expression leftOperand, Lt operator, Expression rightOperand) {
-        return operation(Ops.LT, leftOperand, rightOperand);
+        return asComparable(leftOperand).lt(rightOperand);
     }
 
     @Relational BooleanExpression is(Expression leftOperand, GtEqual operator, Expression rightOperand) {
-        return operation(Ops.GOE, leftOperand, rightOperand);
+        return asComparable(leftOperand).goe(rightOperand);
     }
 
     @Relational BooleanExpression is(Expression leftOperand, LtEqual operator, Expression rightOperand) {
-        return operation(Ops.LOE, leftOperand, rightOperand);
+        return asComparable(leftOperand).loe(rightOperand);
     }
 
     @Relational BooleanExpression is (Expression expression) {
-        return Expressions.asBoolean(expression);
+        return asBoolean(expression);
     }
 
     Expression is1 (@Additive Expression expression) {
@@ -120,27 +112,35 @@ public class QueryFactory {
     }
 
     @Additive Expression is (@Additive Expression leftOperand, Plus operator, @Multiplicative Expression rightOperand) {
-        return operation(Ops.ADD, leftOperand, rightOperand);
+        return asNumber(leftOperand).add(rightOperand);
     }
 
     @Additive Expression is (@Additive Expression leftOperand, Minus operator, @Multiplicative Expression rightOperand) {
-        return operation(Ops.SUB, leftOperand, rightOperand);
+        return asNumber(leftOperand).subtract(rightOperand);
     }
 
     @Multiplicative Expression is (@Multiplicative Expression leftOperand, Star operator, @Unary Expression rightOperand) {
-        return operation(Ops.MULT, leftOperand, rightOperand);
+        return asNumber(leftOperand).multiply(rightOperand);
     }
 
     @Multiplicative Expression is (@Multiplicative Expression leftOperand, Sl operator, @Unary Expression rightOperand) {
-        return operation(Ops.DIV, leftOperand, rightOperand);
+        return asNumber(leftOperand).divide(rightOperand);
+    }
+
+    @Multiplicative Expression is (@Multiplicative Expression leftOperand, @Name("%") Token operator, @Unary Expression rightOperand) {
+        return asNumber(leftOperand).mod(rightOperand);
     }
 
     @Unary Expression is(Minus operator, @Unary Expression operand) {
-        return operation(Ops.NEGATE, operand);
+        return asNumber(operand).negate();
     }
 
     @Unary Expression is2 (@Atomic Expression expression) {
         return expression;
+    }
+
+    @Atomic Expression is (Object object) {
+        return object instanceof Expression ? (Expression) object : constant(object);
     }
 
     Object is (@Match(DOUBLE) Double value) {
@@ -163,10 +163,6 @@ public class QueryFactory {
 
     Object is (Identifier identifier, LPar opening, @CommaSeparated List<Expression> parameters, RPar closing) {
         return is(root, null, identifier, opening, parameters, closing);
-    }
-
-    @Atomic Expression is (Object object) {
-        return object instanceof Expression ? (Expression) object : constant(object);
     }
 
     Object is (Object object, Dot operator, Identifier property) {

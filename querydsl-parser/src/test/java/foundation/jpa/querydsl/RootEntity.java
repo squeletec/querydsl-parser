@@ -23,6 +23,8 @@ public class RootEntity {
 
     private int size;
 
+    private int intValue;
+
     private EnumValue enumValue;
 
     public long getId() {
@@ -76,6 +78,15 @@ public class RootEntity {
 
     public RootEntity setSize(int size) {
         this.size = size;
+        return this;
+    }
+
+    public int getIntValue() {
+        return intValue;
+    }
+
+    public RootEntity setIntValue(int intValue) {
+        this.intValue = intValue;
         return this;
     }
 

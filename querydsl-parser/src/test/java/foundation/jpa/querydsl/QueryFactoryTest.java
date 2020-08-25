@@ -35,7 +35,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     public void load() {
         if(loaded) return;
         loaded = true;
-        repository.save(new RootEntity().setName("ROOT1").setEnumValue(EnumValue.VALUE1).setSize(15).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
+        repository.save(new RootEntity().setName("ROOT1").setEnumValue(EnumValue.VALUE1).setSize(15).setIntValue(1).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
                 new ManyToManyEntity(), new ManyToManyEntity()
         )).setOneToManyEntities(asList(
                 new OneToManyEntity().setString("A"), new OneToManyEntity().setString("B"), new OneToManyEntity().setString("C")
@@ -52,7 +52,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         Page<RootEntity> all = findAll("name = 'ROOT1' and oneToManyEntity.string = 'B'", 1);
     }
 
-    @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No such field: oneToManyEee on entity rootEntity. Available fields are: rootEntity, enumValue, id, manyToManyEntities, manyToOneEntity, name, oneToManyEntities, size\n" +
+    @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No such field: oneToManyEee on entity rootEntity. Available fields are: rootEntity, enumValue, id, intValue, manyToManyEntities, manyToOneEntity, name, oneToManyEntities, size\n" +
             "\tat string: line: 1, character: 13")
     public void negativeTest() throws IOException {
         findAll("oneToManyEee.name = aaaROOT1", 1);
@@ -61,6 +61,16 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     @Test
     public void varTest() throws IOException {
         findAll("enumValue = VALUE1", 1);
+    }
+
+    @Test
+    public void gtTest() throws IOException {
+        findAll("size > 1", 1);
+    }
+
+    @Test
+    public void plusTest() throws IOException {
+        findAll("size + intValue = 16", 1);
     }
 
     @Test
@@ -78,7 +88,6 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     public void manyToOneTest() throws IOException {
         findAll("oneToManyEntities.any.string = 'A'", 2);
     }
-
 
     @Test
     public void notManyToOneTest() throws IOException {
