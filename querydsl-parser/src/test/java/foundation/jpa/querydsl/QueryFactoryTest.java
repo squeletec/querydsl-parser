@@ -26,7 +26,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
 
     private boolean loaded = false;
     private Page<RootEntity> findAll(String query, int expectedSize) throws IOException {
-        Page<RootEntity> page = repository.findAll(queryContext.parse(rootEntity, query), Pageable.unpaged());
+        Page<RootEntity> page = repository.findAll(queryContext.parsePredicate(rootEntity, query), Pageable.unpaged());
         assertEquals(page.getSize(), expectedSize);
         return page;
     }
@@ -78,10 +78,15 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         findAll("enumValue = EnumValue.VALUE1", 1);
     }
 
-    @Test(enabled = false)
-    // TODO: Autowired ConversionService not taking JPA converter.
+    @Test
     public void entityTest() throws IOException {
-        findAll("manyToOneEntity = 2", 0);
+        findAll("manyToOneEntity = 2", 1);
+    }
+
+    @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No ManyToOneEntity 13 exists!\n" +
+            "\tat string: line: 1, character: 21")
+    public void negativeEntityTest() throws IOException {
+        findAll("manyToOneEntity = 13", 0);
     }
 
     @Test

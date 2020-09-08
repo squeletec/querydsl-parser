@@ -147,7 +147,7 @@ public class QueryFactory {
         return constant(value);
     }
 
-    Object is (@Match(INTEGER) Integer value) {
+    Object is (@Match(INTEGER) Long value) {
         return constant(value);
     }
 

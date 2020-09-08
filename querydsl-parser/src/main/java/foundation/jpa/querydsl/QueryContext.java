@@ -35,7 +35,7 @@ public class QueryContext {
         return new QueryContext(EntityConverter.noConversion(), emptyMap());
     }
 
-    public Predicate parse(EntityPath<?> entityPath, String query) throws IOException, SyntaxError {
+    public Predicate parsePredicate(EntityPath<?> entityPath, String query) throws IOException, SyntaxError {
         if(query == null || query.isEmpty())
             return new BooleanBuilder().and(null);
         return new PredicateParser(new QueryFactory(entityConverter, variables, entityPath)).parseString(query);

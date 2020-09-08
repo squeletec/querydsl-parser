@@ -8,16 +8,25 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 
 import static com.querydsl.core.types.dsl.Expressions.constant;
+import static java.util.Objects.requireNonNull;
 
 public class QueryUtils {
     public static BooleanExpression resolveOperation(Ops operator, Expression<?> leftOperand, Expression<?> rightOperand, EntityConverter entityConverter) {
         if(leftOperand instanceof EntityPath && rightOperand instanceof Constant) {
-            rightOperand = constant(entityConverter.convert(((Constant<?>) rightOperand).getConstant(), leftOperand.getType()));
+            rightOperand = convert(rightOperand, leftOperand, entityConverter);
         } else if(rightOperand instanceof EntityPath && leftOperand instanceof Constant) {
-            leftOperand = constant(entityConverter.convert(((Constant<?>) leftOperand).getConstant(), rightOperand.getType()));
+            leftOperand = convert(leftOperand, rightOperand, entityConverter);
         }
         return Expressions.booleanOperation(operator, leftOperand, rightOperand);
 
     }
 
+    private static Expression<?> convert(Expression<?> constant, Expression<?> toType, EntityConverter entityConverter) {
+        Object value = ((Constant<?>) constant).getConstant();
+        Class<?> type = toType.getType();
+        return constant(requireNonNull(
+                entityConverter.convert(value, type),
+                () -> "No " + type.getSimpleName() + " " + value + " exists!"
+        ));
+    }
 }

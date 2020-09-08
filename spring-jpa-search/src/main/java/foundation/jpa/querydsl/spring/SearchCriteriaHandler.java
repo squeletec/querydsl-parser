@@ -20,23 +20,10 @@ import static org.springframework.web.context.request.RequestAttributes.SCOPE_SE
 
 public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
 
-    private final String queryParameterName;
-    private final String sortParameterName;
-    private final String pageParameterName;
-    private final String sizeParameterName;
     private final int defaultPageSize;
     private final int defaultPage;
 
-    public SearchCriteriaHandler(String queryParameterName,
-                                 String sortParameterName,
-                                 String pageParameterName,
-                                 String sizeParameterName,
-                                 int defaultPageSize,
-                                 int defaultPage) {
-        this.queryParameterName = queryParameterName;
-        this.sortParameterName = sortParameterName;
-        this.pageParameterName = pageParameterName;
-        this.sizeParameterName = sizeParameterName;
+    public SearchCriteriaHandler(int defaultPageSize, int defaultPage) {
         this.defaultPageSize = defaultPageSize;
         this.defaultPage = defaultPage;
     }
@@ -51,9 +38,9 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
         CacheQuery cacheQuery = methodParameter.getParameterAnnotation(CacheQuery.class);
         String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
         return new SearchCriteriaImpl<>(
-                get(nativeWebRequest, queryParameterName, cacheQuery, typeName, defaultQuery(methodParameter)),
-                get(nativeWebRequest, sortParameterName, cacheQuery, typeName, defaultSort(methodParameter)),
-                pageable(methodParameter.getMethodAnnotation(PageableDefault.class), nativeWebRequest),
+                get(nativeWebRequest, methodParameter.getParameterName(), cacheQuery, typeName, defaultQuery(methodParameter)),
+                get(nativeWebRequest, methodParameter.getParameterName() + "Order", cacheQuery, typeName, defaultSort(methodParameter)),
+                pageable(methodParameter.getMethodAnnotation(PageableDefault.class), methodParameter.getParameterName(), nativeWebRequest),
                 getEntityPath(methodParameter)
         );
     }
@@ -91,13 +78,15 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
     }
 
 
-    private Pageable pageable(PageableDefault pageableDefault, NativeWebRequest request) {
+    private Pageable pageable(PageableDefault pageableDefault, String parameterName, NativeWebRequest request) {
         int page = defaultPage;
         int size = defaultPageSize;
         if(nonNull(pageableDefault)) {
             page = pageableDefault.page();
             size = pageableDefault.size();
         }
+        String pageParameterName = parameterName + "Page";
+        String sizeParameterName = parameterName + "Size";
         if(nonNull(request.getParameter(pageParameterName))) {
             page = Integer.parseInt(request.getParameter(pageParameterName));
         }

@@ -11,6 +11,7 @@ import foundation.jpa.querydsl.spring.SearchEngine;
 import foundation.jpa.querydsl.spring.SearchResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
 
@@ -37,9 +38,14 @@ public class SearchEngineImpl implements SearchEngine {
         return search(criteria, queryFactory.selectFrom(criteria.getEntityPath()).where(implicitPredicate));
     }
 
+    @Override
+    public <E> SearchResult<E> search(EntityPath<E> entityPath, String query, String sort, Pageable pageable) {
+        return search(new SearchCriteriaImpl<>(query, sort, pageable, entityPath));
+    }
+
     private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, JPAQuery<E> jpaQuery) {
         try {
-            JPAQuery<E> query = jpaQuery.where(queryContext.parse(criteria.getEntityPath(), criteria.getQuery()))
+            JPAQuery<E> query = jpaQuery.where(queryContext.parsePredicate(criteria.getEntityPath(), criteria.getQuery()))
                     .orderBy(queryContext.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());
