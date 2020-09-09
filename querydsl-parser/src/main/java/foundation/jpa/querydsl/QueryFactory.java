@@ -16,25 +16,26 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static foundation.jpa.querydsl.QueryUtils.*;
+import static foundation.jpa.querydsl.QueryVariables.local;
 import static foundation.rpg.common.Patterns.*;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.joining;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class QueryFactory {
 
     private final EntityConverter entityConverter;
-    private final Map<String, Object> variables;
+    private final QueryVariables variables;
     private final EntityPath<?> root;
 
-    public QueryFactory(EntityConverter entityConverter, Map<String, Object> variables, EntityPath<?> root) {
+    public QueryFactory(EntityConverter entityConverter, QueryVariables variables, EntityPath<?> root) {
         this.entityConverter = entityConverter;
-        this.variables = variables;
+        this.variables = local(singletonMap(root.toString(), root), variables);
         this.root = root;
     }
 
@@ -157,7 +158,7 @@ public class QueryFactory {
 
     Object is (Identifier identifier) {
         String id = identifier.toString();
-        return id.equals(root.toString()) ? root : variables.containsKey(id) ? variables.get(id) : is(root, null, identifier);
+        return variables.isDefined(id) ? variables.get(id) : is(root, null, identifier);
     }
 
 

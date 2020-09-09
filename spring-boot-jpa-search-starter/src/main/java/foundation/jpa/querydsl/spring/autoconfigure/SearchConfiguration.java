@@ -1,5 +1,7 @@
 package foundation.jpa.querydsl.spring.autoconfigure;
 
+import foundation.jpa.querydsl.QueryVariables;
+import foundation.jpa.querydsl.spring.JpaQueryContext;
 import foundation.jpa.querydsl.spring.SearchCriteriaHandler;
 import foundation.jpa.querydsl.spring.SearchEngine;
 import foundation.jpa.querydsl.spring.SearchHandler;
@@ -12,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 
 import java.util.List;
@@ -35,13 +38,19 @@ public class SearchConfiguration implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
-    public SearchHandler searchHandler(SearchCriteriaHandler searchCriteriaHandler, SearchEngine searchEngine) {
-        return new SearchHandler(searchCriteriaHandler, searchEngine);
+    public QueryVariables globalVariables(EntityManager entityManager) {
+        return JpaQueryContext.enumValues(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SearchHandler searchHandler(SearchCriteriaHandler searchCriteriaHandler, SearchEngine searchEngine, Provider<QueryVariables> variables) {
+        return new SearchHandler(searchCriteriaHandler, searchEngine, variables);
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(searchHandler(null, null));
+        resolvers.add(searchHandler(null, null, null));
         resolvers.add(searchCriteriaHandler(0, 0));
     }
 

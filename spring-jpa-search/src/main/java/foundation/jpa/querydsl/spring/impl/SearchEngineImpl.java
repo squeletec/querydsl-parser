@@ -5,6 +5,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryContext;
+import foundation.jpa.querydsl.QueryVariables;
 import foundation.jpa.querydsl.spring.JpaQueryContext;
 import foundation.jpa.querydsl.spring.SearchCriteria;
 import foundation.jpa.querydsl.spring.SearchEngine;
@@ -29,23 +30,23 @@ public class SearchEngineImpl implements SearchEngine {
         this(new JPAQueryFactory(entityManager), new JpaQueryContext(entityManager));
     }
 
-    public <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria) {
-        return search(criteria, queryFactory.selectFrom(criteria.getEntityPath()));
+    public <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables) {
+        return search(criteria, variables, queryFactory.selectFrom(criteria.getEntityPath()));
     }
 
     @Override
-    public <E> SearchResult<E> search(Predicate implicitPredicate, SearchCriteria<? extends EntityPath<E>> criteria) {
-        return search(criteria, queryFactory.selectFrom(criteria.getEntityPath()).where(implicitPredicate));
+    public <E> SearchResult<E> search(Predicate implicitPredicate, SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables) {
+        return search(criteria, variables, queryFactory.selectFrom(criteria.getEntityPath()).where(implicitPredicate));
     }
 
     @Override
-    public <E> SearchResult<E> search(EntityPath<E> entityPath, String query, String sort, Pageable pageable) {
-        return search(new SearchCriteriaImpl<>(query, sort, pageable, entityPath));
+    public <E> SearchResult<E> search(EntityPath<E> entityPath, String query, String sort, Pageable pageable, QueryVariables variables) {
+        return search(new SearchCriteriaImpl<>(query, sort, pageable, entityPath), variables);
     }
 
-    private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, JPAQuery<E> jpaQuery) {
+    private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables, JPAQuery<E> jpaQuery) {
         try {
-            JPAQuery<E> query = jpaQuery.where(queryContext.parsePredicate(criteria.getEntityPath(), criteria.getQuery()))
+            JPAQuery<E> query = jpaQuery.where(queryContext.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
                     .orderBy(queryContext.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());

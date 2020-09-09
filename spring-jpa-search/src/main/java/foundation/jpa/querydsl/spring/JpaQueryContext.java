@@ -1,6 +1,7 @@
 package foundation.jpa.querydsl.spring;
 
 import foundation.jpa.querydsl.QueryContext;
+import foundation.jpa.querydsl.QueryVariables;
 import org.springframework.core.convert.ConversionService;
 
 import javax.persistence.EntityManager;
@@ -14,18 +15,19 @@ import java.util.stream.Stream;
 public class JpaQueryContext extends QueryContext {
 
     public JpaQueryContext(ConversionService conversionService, EntityManager entityManager) {
-        super(conversionService::convert, enumValues(entityManager.getMetamodel().getEntities()));
+        super(conversionService::convert);
     }
 
     public JpaQueryContext(EntityManager entityManager) {
-        super((o, c) -> entityManager.find(c, o), enumValues(entityManager.getMetamodel().getEntities()));
+        super((o, c) -> entityManager.find(c, o));
     }
 
-    public static Map<String, Object> enumValues(Set<EntityType<?>> entities) {
+    public static QueryVariables enumValues(EntityManager entityManager) {
         Map<String, Object> variables = new LinkedHashMap<>();
-        entities.stream().flatMap(e -> e.getAttributes().stream()).map(Attribute::getJavaType).filter(Class::isEnum)
+        entityManager.getMetamodel().getEntities().stream().flatMap(e -> e.getAttributes().stream()).map(Attribute::getJavaType).filter(Class::isEnum)
                 .peek(c -> variables.put(c.getSimpleName(), c))
                 .flatMap(e -> Stream.of(((Class<Enum<?>>)e).getEnumConstants())).forEach(e -> variables.put(e.name(), e));
-        return variables;
+        return QueryVariables.map(variables);
     }
+
 }

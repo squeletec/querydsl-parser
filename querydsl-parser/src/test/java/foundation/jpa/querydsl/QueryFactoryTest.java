@@ -24,9 +24,12 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     @Inject
     private RootEntityRepository repository;
 
+    @Inject
+    private QueryVariables variables;
+
     private boolean loaded = false;
     private Page<RootEntity> findAll(String query, int expectedSize) throws IOException {
-        Page<RootEntity> page = repository.findAll(queryContext.parsePredicate(rootEntity, query), Pageable.unpaged());
+        Page<RootEntity> page = repository.findAll(queryContext.parsePredicate(rootEntity, query, variables), Pageable.unpaged());
         assertEquals(page.getSize(), expectedSize);
         return page;
     }
