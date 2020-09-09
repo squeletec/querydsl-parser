@@ -37,10 +37,12 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
     public SearchCriteria<? extends EntityPath<?>> resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
         CacheQuery cacheQuery = methodParameter.getParameterAnnotation(CacheQuery.class);
         String typeName = ((ParameterizedType) methodParameter.getGenericParameterType()).getActualTypeArguments()[0].getTypeName();
+        String parameterName = methodParameter.getParameterName();
         return new SearchCriteriaImpl<>(
-                get(nativeWebRequest, methodParameter.getParameterName(), cacheQuery, typeName, defaultQuery(methodParameter)),
-                get(nativeWebRequest, methodParameter.getParameterName() + "Order", cacheQuery, typeName, defaultSort(methodParameter)),
-                pageable(methodParameter.getMethodAnnotation(PageableDefault.class), methodParameter.getParameterName(), nativeWebRequest),
+                parameterName,
+                get(nativeWebRequest, parameterName, cacheQuery, typeName, defaultQuery(methodParameter)),
+                get(nativeWebRequest, parameterName + "Order", cacheQuery, typeName, defaultSort(methodParameter)),
+                pageable(methodParameter.getMethodAnnotation(PageableDefault.class), parameterName, nativeWebRequest),
                 getEntityPath(methodParameter)
         );
     }

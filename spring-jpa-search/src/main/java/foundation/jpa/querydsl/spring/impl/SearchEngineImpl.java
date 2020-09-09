@@ -41,7 +41,7 @@ public class SearchEngineImpl implements SearchEngine {
 
     @Override
     public <E> SearchResult<E> search(EntityPath<E> entityPath, String query, String sort, Pageable pageable, QueryVariables variables) {
-        return search(new SearchCriteriaImpl<>(query, sort, pageable, entityPath), variables);
+        return search(new SearchCriteriaImpl<>("query", query, sort, pageable, entityPath), variables);
     }
 
     private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables, JPAQuery<E> jpaQuery) {

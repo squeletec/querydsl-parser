@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface SearchCriteria<E extends EntityPath<?>> {
 
+    String getParameterName();
+
     String getQuery();
 
     String getSort();

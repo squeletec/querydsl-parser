@@ -24,7 +24,7 @@ public class QueryUtils {
     private static Expression<?> convert(Expression<?> constant, Expression<?> toType, EntityConverter entityConverter) {
         Object value = ((Constant<?>) constant).getConstant();
         Class<?> type = toType.getType();
-        return constant(requireNonNull(
+        return type.isInstance(value) ? constant : constant(requireNonNull(
                 entityConverter.convert(value, type),
                 () -> "No " + type.getSimpleName() + " " + value + " exists!"
         ));

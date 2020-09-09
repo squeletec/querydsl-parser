@@ -12,7 +12,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 import static foundation.jpa.querydsl.QRootEntity.rootEntity;
+import static foundation.jpa.querydsl.QueryVariables.local;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 import static org.testng.Assert.assertEquals;
 
 @SpringBootTest
@@ -23,6 +25,9 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
 
     @Inject
     private RootEntityRepository repository;
+
+    @Inject
+    private ManyToOneEntityRepository manyToOneEntityRepository;
 
     @Inject
     private QueryVariables variables;
@@ -84,6 +89,13 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     @Test
     public void entityTest() throws IOException {
         findAll("manyToOneEntity = 2", 1);
+    }
+
+    @Test
+    public void entityNoConvertTest() throws IOException {
+        ManyToOneEntity e2 = manyToOneEntityRepository.getOne(2L);
+        Page<RootEntity> page = repository.findAll(queryContext.parsePredicate(rootEntity, "manyToOneEntity = e2", local(singletonMap("e2", e2), variables)), Pageable.unpaged());
+        assertEquals(page.getSize(), 1);
     }
 
     @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No ManyToOneEntity 13 exists!\n" +
