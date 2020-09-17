@@ -1,5 +1,6 @@
 package foundation.jpa.querydsl.spring;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Predicate;
 import foundation.jpa.querydsl.QueryVariables;
@@ -12,5 +13,7 @@ public interface SearchEngine {
     <E> SearchResult<E> search(Predicate implicitPredicate, SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables);
 
     <E> SearchResult<E> search(EntityPath<E> entityPath, String query, String sort, Pageable pageable, QueryVariables variables);
+
+    <E> SearchResult<Tuple> aggregate(AggregateCriteria<? extends EntityPath<E>> aggregateCriteria, QueryVariables variables);
 
 }

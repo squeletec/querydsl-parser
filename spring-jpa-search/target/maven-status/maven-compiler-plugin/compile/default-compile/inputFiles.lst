@@ -1,8 +1,11 @@
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/impl/SearchResultImpl.java
+/home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/impl/AggregateCriteriaImpl.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/SearchResult.java
+/home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/impl/AggregationResultImpl.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/DefaultQuery.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/SearchCriteriaHandler.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/CacheQuery.java
+/home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/AggregateCriteria.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/JpaQueryContext.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/SearchCriteria.java
 /home/c0stra/IdeaProjects/querydsl-parser/spring-jpa-search/src/main/java/foundation/jpa/querydsl/spring/impl/SearchEngineImpl.java

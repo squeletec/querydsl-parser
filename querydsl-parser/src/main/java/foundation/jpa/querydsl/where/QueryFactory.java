@@ -1,7 +1,9 @@
-package foundation.jpa.querydsl;
+package foundation.jpa.querydsl.where;
 
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import foundation.jpa.querydsl.EntityConverter;
+import foundation.jpa.querydsl.QueryVariables;
 import foundation.rpg.Match;
 import foundation.rpg.Name;
 import foundation.rpg.StartSymbol;
