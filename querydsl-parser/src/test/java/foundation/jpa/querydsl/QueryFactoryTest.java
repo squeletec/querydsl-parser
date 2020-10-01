@@ -120,6 +120,11 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void inLiteralTest() throws IOException {
+        findAll("name in ('ROOT1', 'ROOT2')", 2);
+    }
+
+    @Test
     public void notInTest() throws IOException {
         findAll("enumValue not in (VALUE1)", 1);
     }

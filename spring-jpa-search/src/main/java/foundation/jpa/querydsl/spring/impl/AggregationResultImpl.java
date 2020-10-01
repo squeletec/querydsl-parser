@@ -42,4 +42,5 @@ public class AggregationResultImpl implements SearchResult<Tuple> {
     public String toString() {
         return page.toString();
     }
+
 }

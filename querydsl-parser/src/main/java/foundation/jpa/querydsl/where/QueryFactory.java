@@ -147,15 +147,15 @@ public class QueryFactory {
     }
 
     Object is (@Match(DOUBLE) Double value) {
-        return constant(value);
+        return value;
     }
 
     Object is (@Match(INTEGER) Long value) {
-        return constant(value);
+        return value;
     }
 
     Object is (@Match(QUOTED_STRING) String value) {
-        return constant(value.substring(1, value.length() - 1));
+        return value.substring(1, value.length() - 1);
     }
 
     Object is (Identifier identifier) {
