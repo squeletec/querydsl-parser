@@ -39,7 +39,10 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
 
+import static foundation.jpa.querydsl.QDocument.document;
 import static foundation.jpa.querydsl.QRootEntity.rootEntity;
 import static foundation.jpa.querydsl.QueryVariables.local;
 import static java.util.Arrays.asList;
@@ -54,6 +57,15 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
 
     @Inject
     private RootEntityRepository repository;
+
+    @Inject
+    private DocumentTypeRepository documentTypeRepository;
+
+    @Inject
+    private DocumentRepository documentRepository;
+
+    @Inject
+    private FieldTypeRepository fieldTypeRepository;
 
     @Inject
     private ManyToOneEntityRepository manyToOneEntityRepository;
@@ -82,11 +94,48 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         )).setOneToManyEntities(asList(
                 new OneToManyEntity().setString("D"), new OneToManyEntity().setString("A")
         )));
+        FieldType string = fieldTypeRepository.save(new FieldType().setName("string"));
+        DocumentType story = documentTypeRepository.save(new DocumentType().setName("Story").setDescription("Aha").setFields(asList(
+                new Field().setName("state").setType(string),
+                new Field().setName("priority").setType(string)
+        )));
+        Document newStory = new Document().setDocumentType(story).setName("New story").setValues(new LinkedHashMap<>());
+        for(Field f : story.getFields()) {
+            newStory.getValues().put(f.getName(), new FieldValue().setField(f).setName(f.getName()));
+        }
+        newStory.getValues().get("state").setData("New");
+        newStory.getValues().get("priority").setData("Critical");
+        documentRepository.save(newStory);
+        Document openStory = new Document().setDocumentType(story).setName("Open story").setValues(new LinkedHashMap<>());
+        for(Field f : story.getFields()) {
+            openStory.getValues().put(f.getName(), new FieldValue().setField(f).setName(f.getName()));
+        }
+        openStory.getValues().get("state").setData("Open");
+        openStory.getValues().get("priority").setData("Major");
+        documentRepository.save(openStory);
     }
 
     @Test
     public void test() throws IOException {
         Page<RootEntity> all = findAll("name = 'ROOT1' and oneToManyEntity.string = 'B'", 1);
+    }
+
+    @Test
+    public void testMap() {
+        Page<Document> page = documentRepository.findAll(document.get("state").eq("New"), Pageable.unpaged());
+        assertEquals(page.getSize(), 1);
+    }
+
+    @Test
+    public void testMapQuery() throws IOException {
+        Page<Document> page = documentRepository.findAll(queryContext.parsePredicate(document, "state = 'New' and priority = 'Critical'", variables), Pageable.unpaged());
+        assertEquals(page.getSize(), 1);
+    }
+
+    @Test
+    public void testFullMapQuery() throws IOException {
+        Page<Document> page = documentRepository.findAll(queryContext.parsePredicate(document, "values.state.data = 'New'", variables), Pageable.unpaged());
+        assertEquals(page.getSize(), 1);
     }
 
     @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No such field: oneToManyEee on entity rootEntity. Available fields are: rootEntity, enumValue, id, intValue, manyToManyEntities, manyToOneEntity, name, oneToManyEntities, size\n" +

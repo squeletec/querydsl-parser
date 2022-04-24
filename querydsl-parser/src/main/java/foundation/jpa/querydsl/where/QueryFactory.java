@@ -31,6 +31,7 @@ package foundation.jpa.querydsl.where;
 
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.MapPath;
 import foundation.jpa.querydsl.EntityConverter;
 import foundation.jpa.querydsl.QueryVariables;
 import foundation.rpg.Match;
@@ -203,9 +204,18 @@ public class QueryFactory {
         try {
             return type.getField(name).get(object);
         } catch (IllegalAccessException | NoSuchFieldException e) {
+            if(object instanceof MapPath) {
+                return ((MapPath) object).get(name);
+            }
             try {
-                return type.getMethod(name).invoke(object);
-            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
+                return type.getMethod("get", String.class).invoke(object, name);
+            } catch (IllegalAccessException | NoSuchMethodException eex) {
+                try {
+                    return type.getMethod(name).invoke(object);
+                } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
+                    throw new IllegalArgumentException("No such field: " + name + " on entity " + object + ". Available fields are: " + Stream.of(object.getClass().getFields()).map(Field::getName).collect(joining(", ")), ex);
+                }
+            } catch (InvocationTargetException ex) {
                 throw new IllegalArgumentException("No such field: " + name + " on entity " + object + ". Available fields are: " + Stream.of(object.getClass().getFields()).map(Field::getName).collect(joining(", ")), ex);
             }
         }
@@ -222,9 +232,9 @@ public class QueryFactory {
                 return method.invoke(object, a);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Unable to invoke method: " + property.toString() + " with " + Arrays.toString(arguments) + " on entity " + object + ".", e);
+            throw new IllegalArgumentException("Unable to invoke method: " + property + " with " + Arrays.toString(arguments) + " on entity " + object + ".", e);
         }
-        throw new IllegalArgumentException("No such method: " + property.toString() + " on entity " + object + " with " + size + " parameters.");
+        throw new IllegalArgumentException("No such method: " + property + " on entity " + object + " with " + size + " parameters.");
     }
 
 
