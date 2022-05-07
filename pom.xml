@@ -50,9 +50,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
-        <querydsl.version>4.3.1</querydsl.version>
-        <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
-        <spring.version>5.2.5.RELEASE</spring.version>
+        <querydsl.version>5.0.0</querydsl.version>
+        <spring-boot.version>2.6.7</spring-boot.version>
+        <spring.version>5.3.19</spring.version>
     </properties>
 
 
