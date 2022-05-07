@@ -32,7 +32,7 @@
     <parent>
         <artifactId>querydsl-parser-project</artifactId>
         <groupId>foundation.fluent.api</groupId>
-        <version>0.17-SNAPSHOT</version>
+        <version>0.17</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
