@@ -78,6 +78,7 @@ public class SearchApplication implements WebMvcConfigurer {
         )).setOneToManyEntities(asList(
                 new OneToManyEntity().setString("D"), new OneToManyEntity().setString("A")
         )));
+        repository.save(new RootEntity().setName("ROOT2").setEnumValue(EnumValue.VALUE2).setSize(0).setManyToOneEntity(new ManyToOneEntity()));
         return true;
     }
 

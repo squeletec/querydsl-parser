@@ -34,6 +34,8 @@ import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import foundation.jpa.querydsl.group.GroupFactory;
+import foundation.jpa.querydsl.group.GroupParser;
 import foundation.jpa.querydsl.groupby.GroupByFactory;
 import foundation.jpa.querydsl.groupby.GroupByParser;
 import foundation.jpa.querydsl.order.OrderByParser;
@@ -72,11 +74,11 @@ public class QueryContext {
         return new OrderByParser(new OrderFactory(entityPath)).parseString(orderBy);
     }
 
-    public Expression<?>[] parseSelect(EntityPath<?> entityPath, String select) throws IOException {
+    public Expression<?>[] parseSelect(EntityPath<?> entityPath, String select, QueryVariables queryVariables) throws IOException {
         if(select == null) {
             return new Expression<?>[0];
         }
-        return new GroupByParser(new GroupByFactory(entityPath)).parseString(select);
+        return new GroupParser(new GroupFactory(entityConverter, queryVariables, entityPath)).parseString(select);
     }
 
 }

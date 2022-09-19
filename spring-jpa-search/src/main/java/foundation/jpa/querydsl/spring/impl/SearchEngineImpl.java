@@ -29,9 +29,9 @@
 
 package foundation.jpa.querydsl.spring.impl;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryContext;
@@ -42,6 +42,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 
 public class SearchEngineImpl implements SearchEngine {
 
@@ -73,13 +74,13 @@ public class SearchEngineImpl implements SearchEngine {
     }
 
     @Override
-    public <E> SearchResult<Tuple> aggregate(AggregateCriteria<? extends EntityPath<E>> criteria, QueryVariables variables) {
+    public <E> SearchResult<List<?>> aggregate(AggregateCriteria<? extends EntityPath<E>> criteria, QueryVariables variables) {
         try {
-            JPAQuery<Tuple> query = queryFactory.selectFrom(criteria.getEntityPath())
+            JPAQuery<List<?>> query = queryFactory.selectFrom(criteria.getEntityPath())
                     .where(queryContext.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
                     .orderBy(queryContext.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
-                    .groupBy(queryContext.parseSelect(criteria.getEntityPath(), criteria.groupBy()))
-                    .select(queryContext.parseSelect(criteria.getEntityPath(), criteria.select()))
+                    .groupBy(queryContext.parseSelect(criteria.getEntityPath(), criteria.groupBy(), variables))
+                    .select(Projections.list(queryContext.parseSelect(criteria.getEntityPath(), criteria.select(), variables)))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());
             return new AggregationResultImpl(new PageImpl<>(query.fetch(), criteria.getPageable(), query.fetchCount()), null);

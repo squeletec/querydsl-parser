@@ -37,6 +37,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.inject.Provider;
+import java.util.List;
 
 public class SearchApi<R, E extends EntityPath<R>> {
 
@@ -59,8 +60,9 @@ public class SearchApi<R, E extends EntityPath<R>> {
     }
 
     @GetMapping("/aggregation")
-    public String aggregation(AggregateCriteria<E> criteria) {
-        return searchEngine.aggregate(new AggregateCriteriaImpl<>("q", "", "", PageRequest.of(0, 20), QRootEntity.rootEntity, "name", "name, count"), variables.get()).toString();
+    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
+        return searchEngine.aggregate(criteria, variables.get());
+        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
     }
 
 }

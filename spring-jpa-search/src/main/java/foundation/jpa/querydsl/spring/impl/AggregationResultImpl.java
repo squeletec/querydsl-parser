@@ -29,31 +29,32 @@
 
 package foundation.jpa.querydsl.spring.impl;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
 import foundation.jpa.querydsl.spring.SearchCriteria;
 import foundation.jpa.querydsl.spring.SearchResult;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 import static java.util.Objects.nonNull;
 
-public class AggregationResultImpl implements SearchResult<Tuple> {
+public class AggregationResultImpl implements SearchResult<List<?>> {
 
-    private final Page<Tuple> page;
+    private final Page<List<?>> page;
     private final Throwable error;
 
-    public AggregationResultImpl(Page<Tuple> page, Throwable error) {
+    public AggregationResultImpl(Page<List<?>> page, Throwable error) {
         this.page = page;
         this.error = error;
     }
 
     @Override
-    public SearchCriteria<? extends EntityPath<Tuple>> getCriteria() {
+    public SearchCriteria<? extends EntityPath<List<?>>> getCriteria() {
         return null;
     }
 
     @Override
-    public Page<Tuple> getPage() {
+    public Page<List<?>> getPage() {
         return page;
     }
 

@@ -35,6 +35,8 @@ import com.querydsl.core.types.Predicate;
 import foundation.jpa.querydsl.QueryVariables;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface SearchEngine {
 
     <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables);
@@ -43,6 +45,6 @@ public interface SearchEngine {
 
     <E> SearchResult<E> search(EntityPath<E> entityPath, String query, String sort, Pageable pageable, QueryVariables variables);
 
-    <E> SearchResult<Tuple> aggregate(AggregateCriteria<? extends EntityPath<E>> aggregateCriteria, QueryVariables variables);
+    <E> SearchResult<List<?>> aggregate(AggregateCriteria<? extends EntityPath<E>> aggregateCriteria, QueryVariables variables);
 
 }

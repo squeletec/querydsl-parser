@@ -30,10 +30,7 @@
 package foundation.jpa.querydsl.spring.autoconfigure;
 
 import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.JpaQueryContext;
-import foundation.jpa.querydsl.spring.SearchCriteriaHandler;
-import foundation.jpa.querydsl.spring.SearchEngine;
-import foundation.jpa.querydsl.spring.SearchHandler;
+import foundation.jpa.querydsl.spring.*;
 import foundation.jpa.querydsl.spring.impl.SearchEngineImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -61,6 +58,13 @@ public class SearchConfiguration implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
+    public AggregationCriteriaHandler aggregateCriteriaHandler(@Value("${querydsl.search.defaultPage:0}") int defaultPage,
+                                                               @Value("${querydsl.search.defaultPageSize:10}") int defaultPageSize) {
+        return new AggregationCriteriaHandler(defaultPageSize, defaultPage);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public SearchEngine searchEngine(EntityManager entityManager) {
         return new SearchEngineImpl(entityManager);
     }
@@ -81,6 +85,7 @@ public class SearchConfiguration implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(searchHandler(null, null, null));
         resolvers.add(searchCriteriaHandler(0, 0));
+        resolvers.add(aggregateCriteriaHandler(0, 10));
     }
 
 }
