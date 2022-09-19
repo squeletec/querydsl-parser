@@ -34,7 +34,7 @@
     <groupId>foundation.fluent.api</groupId>
     <artifactId>querydsl-parser-project</artifactId>
     <packaging>pom</packaging>
-    <version>0.19-SNAPSHOT</version>
+    <version>0.18-SNAPSHOT</version>
     <modules>
         <module>querydsl-parser</module>
         <module>spring-jpa-search</module>
@@ -162,7 +162,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
