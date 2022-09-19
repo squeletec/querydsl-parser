@@ -42,9 +42,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.springframework.core.GenericTypeResolver.resolveType;
 import static org.springframework.web.context.request.RequestAttributes.SCOPE_SESSION;
 
 public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
@@ -101,7 +103,8 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
     }
 
     private <E> EntityPath<E> getEntityPath(MethodParameter parameter) throws IllegalAccessException {
-        Class<?> entityPathClass = (Class<?>) ((ParameterizedType) parameter.getGenericParameterType()).getActualTypeArguments()[0];
+        Type type = ((ParameterizedType) parameter.getGenericParameterType()).getActualTypeArguments()[0];
+        Class<?> entityPathClass = (Class<?>) resolveType(type, parameter.getContainingClass());
         for(Field field : entityPathClass.getFields())
             if(entityPathClass.equals(field.getType()))
                 return (EntityPath<E>) field.get(null);

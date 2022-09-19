@@ -29,16 +29,38 @@
 
 package foundation.jpa.querydsl.spring.testapp;
 
+import com.querydsl.core.types.EntityPath;
 import foundation.jpa.querydsl.QueryVariables;
 import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.RestController;
+import foundation.jpa.querydsl.spring.impl.AggregateCriteriaImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.inject.Provider;
 
-@RestController
-public class SearchController extends SearchApi<RootEntity, QRootEntity> {
+public class SearchApi<R, E extends EntityPath<R>> {
 
-    public SearchController(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        super(searchEngine, variables);
+    private final SearchEngine searchEngine;
+    private final Provider<QueryVariables> variables;
+
+    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
+        this.searchEngine = searchEngine;
+        this.variables = variables;
     }
+
+    @GetMapping("/search")
+    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
+        return query;
+    }
+
+    @GetMapping("/searchResult")
+    public SearchResult<R> searchResult(SearchCriteria<E> query) {
+        return searchEngine.search(query, variables.get());
+    }
+
+    @GetMapping("/aggregation")
+    public String aggregation(AggregateCriteria<E> criteria) {
+        return searchEngine.aggregate(new AggregateCriteriaImpl<>("q", "", "", PageRequest.of(0, 20), QRootEntity.rootEntity, "name", "name, count"), variables.get()).toString();
+    }
+
 }
