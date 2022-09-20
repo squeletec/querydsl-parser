@@ -53,6 +53,7 @@ public class JpaQueryContext extends QueryContext {
 
     public static QueryVariables enumValues(EntityManager entityManager) {
         Map<String, Object> variables = new LinkedHashMap<>();
+        variables.put(Integer.class.getSimpleName(), Integer.class);
         entityManager.getMetamodel().getEntities().stream().flatMap(e -> e.getAttributes().stream()).map(Attribute::getJavaType).filter(Class::isEnum)
                 .peek(c -> variables.put(c.getSimpleName(), c))
                 .flatMap(e -> Stream.of(((Class<Enum<?>>)e).getEnumConstants())).forEach(e -> variables.put(e.name(), e));

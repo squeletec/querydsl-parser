@@ -61,6 +61,7 @@ public class SearchApi<R, E extends EntityPath<R>> {
 
     @GetMapping("/aggregation")
     public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
+        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
         return searchEngine.aggregate(criteria, variables.get());
         // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
     }

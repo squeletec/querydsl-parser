@@ -10,6 +10,7 @@ foundation/jpa/querydsl/spring/CacheQuery.class
 foundation/jpa/querydsl/spring/Search.class
 foundation/jpa/querydsl/spring/AggregateCriteria.class
 foundation/jpa/querydsl/spring/SearchCriteria.class
+foundation/jpa/querydsl/spring/AggregationCriteriaHandler.class
 foundation/jpa/querydsl/spring/DefaultSort.class
 foundation/jpa/querydsl/spring/impl/SearchEngineImpl.class
 foundation/jpa/querydsl/spring/SearchCriteriaHandlerBuilder.class

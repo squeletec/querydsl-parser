@@ -97,9 +97,9 @@ public class GroupFactory {
         return expression.not();
     }
 
-    @Relational BooleanExpression is (LPar opening, @LogicalOr BooleanExpression expression, RPar closing) {
-        return expression;
-    }
+    //@Relational BooleanExpression is (LPar opening, @LogicalOr BooleanExpression expression, RPar closing) {
+    //    return expression;
+    //}
 
     @Relational BooleanExpression is (Expression leftOperand, Equal operator, Expression rightOperand) {
         return resolveOperation(Ops.EQ, leftOperand, rightOperand, entityConverter);
@@ -183,6 +183,10 @@ public class GroupFactory {
 
     @Atomic Expression is (Object object) {
         return object instanceof Expression ? (Expression) object : constant(object);
+    }
+
+    Object is (LPar l, @LogicalOr BooleanExpression expression, RPar r) {
+        return expression;
     }
 
     Object is (@Match(DOUBLE) Double value) {
