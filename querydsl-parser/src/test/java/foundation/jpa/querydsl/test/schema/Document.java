@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2020, Ondrej Fischer
+ * Copyright (c) 2020-2022, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,70 @@
  *
  */
 
-package foundation.jpa.querydsl.spring.testapp;
+package foundation.jpa.querydsl.test.schema;
 
-import com.querydsl.core.types.EntityPath;
-import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.GetMapping;
+import javax.persistence.*;
+import java.util.Map;
 
-import javax.inject.Provider;
-import java.util.List;
+@Entity
+public class Document {
 
-public class SearchApi<R, E extends EntityPath<R>> {
+    @Id
+    @GeneratedValue
+    private Long id;
 
-    private final SearchEngine searchEngine;
-    private final Provider<QueryVariables> variables;
+    private String name;
 
-    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        this.searchEngine = searchEngine;
-        this.variables = variables;
+    private boolean isClosed;
+
+    @ManyToOne
+    private DocumentType documentType;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @MapKey(name = "name")
+    private Map<String, FieldValue> values;
+
+    public Long getId() {
+        return id;
     }
 
-    @GetMapping("/search")
-    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
-        return query;
+    public Document setId(Long id) {
+        this.id = id;
+        return this;
     }
 
-    @GetMapping("/searchResult")
-    public SearchResult<R> searchResult(SearchCriteria<E> query) {
-        return searchEngine.search(query, variables.get());
+    public String getName() {
+        return name;
     }
 
-    @GetMapping("/aggregation")
-    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
-        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
-        return searchEngine.aggregate(criteria, variables.get());
-        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
+    public Document setName(String name) {
+        this.name = name;
+        return this;
     }
 
+    public DocumentType getDocumentType() {
+        return documentType;
+    }
+
+    public Document setDocumentType(DocumentType documentType) {
+        this.documentType = documentType;
+        return this;
+    }
+
+    public Map<String, FieldValue> getValues() {
+        return values;
+    }
+
+    public Document setValues(Map<String, FieldValue> values) {
+        this.values = values;
+        return this;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
+    }
 }

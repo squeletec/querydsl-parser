@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2020, Ondrej Fischer
+ * Copyright (c) 2020-2022, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,37 @@
  *
  */
 
-package foundation.jpa.querydsl.spring.testapp;
+package foundation.jpa.querydsl.test.schema;
 
-import com.querydsl.core.types.EntityPath;
-import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.GetMapping;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-import javax.inject.Provider;
-import java.util.List;
+@Entity
+public class OneToOneEntity {
 
-public class SearchApi<R, E extends EntityPath<R>> {
+    @Id
+    @GeneratedValue
+    private Long id;
 
-    private final SearchEngine searchEngine;
-    private final Provider<QueryVariables> variables;
+    private String name;
 
-    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        this.searchEngine = searchEngine;
-        this.variables = variables;
+    public Long getId() {
+        return id;
     }
 
-    @GetMapping("/search")
-    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
-        return query;
+    public OneToOneEntity setId(Long id) {
+        this.id = id;
+        return this;
     }
 
-    @GetMapping("/searchResult")
-    public SearchResult<R> searchResult(SearchCriteria<E> query) {
-        return searchEngine.search(query, variables.get());
+    public String getName() {
+        return name;
     }
 
-    @GetMapping("/aggregation")
-    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
-        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
-        return searchEngine.aggregate(criteria, variables.get());
-        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
+    public OneToOneEntity setName(String name) {
+        this.name = name;
+        return this;
     }
 
 }

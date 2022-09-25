@@ -40,10 +40,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.inject.Named;
 import javax.persistence.EntityManager;
-
 import java.util.Collections;
 
-import static foundation.jpa.querydsl.spring.JpaQueryContext.enumValues;
+import static foundation.jpa.querydsl.spring.JpaQueryExecutor.enumValues;
 import static java.util.Arrays.asList;
 
 @SpringBootApplication

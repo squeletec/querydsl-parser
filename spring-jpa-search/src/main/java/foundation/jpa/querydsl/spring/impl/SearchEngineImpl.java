@@ -34,7 +34,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import foundation.jpa.querydsl.QueryContext;
+import foundation.jpa.querydsl.QueryExecutor;
 import foundation.jpa.querydsl.QueryVariables;
 import foundation.jpa.querydsl.spring.*;
 import org.springframework.data.domain.Page;
@@ -47,15 +47,15 @@ import java.util.List;
 public class SearchEngineImpl implements SearchEngine {
 
     private final JPAQueryFactory queryFactory;
-    private final QueryContext queryContext;
+    private final QueryExecutor queryExecutor;
 
-    public SearchEngineImpl(JPAQueryFactory queryFactory, QueryContext queryContext) {
+    public SearchEngineImpl(JPAQueryFactory queryFactory, QueryExecutor queryExecutor) {
         this.queryFactory = queryFactory;
-        this.queryContext = queryContext;
+        this.queryExecutor = queryExecutor;
     }
 
     public SearchEngineImpl(EntityManager entityManager) {
-        this(new JPAQueryFactory(entityManager), new JpaQueryContext(entityManager));
+        this(new JPAQueryFactory(entityManager), new JpaQueryExecutor(entityManager));
     }
 
     @Override
@@ -77,10 +77,10 @@ public class SearchEngineImpl implements SearchEngine {
     public <E> SearchResult<List<?>> aggregate(AggregateCriteria<? extends EntityPath<E>> criteria, QueryVariables variables) {
         try {
             JPAQuery<List<?>> query = queryFactory.selectFrom(criteria.getEntityPath())
-                    .where(queryContext.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
-                    .orderBy(queryContext.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
-                    .groupBy(queryContext.parseSelect(criteria.getEntityPath(), criteria.groupBy(), variables))
-                    .select(Projections.list(queryContext.parseSelect(criteria.getEntityPath(), criteria.select(), variables)))
+                    .where(queryExecutor.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
+                    .orderBy(queryExecutor.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
+                    .groupBy(queryExecutor.parseSelect(criteria.getEntityPath(), criteria.groupBy(), variables))
+                    .select(Projections.list(queryExecutor.parseSelect(criteria.getEntityPath(), criteria.select(), variables)))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());
             return new AggregationResultImpl(new PageImpl<>(query.fetch(), criteria.getPageable(), query.fetchCount()), null);
@@ -91,8 +91,8 @@ public class SearchEngineImpl implements SearchEngine {
 
     private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables, JPAQuery<E> jpaQuery) {
         try {
-            JPAQuery<E> query = jpaQuery.where(queryContext.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
-                    .orderBy(queryContext.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
+            JPAQuery<E> query = jpaQuery.where(queryExecutor.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
+                    .orderBy(queryExecutor.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());
             return new SearchResultImpl<>(criteria, new PageImpl<>(query.fetch(), criteria.getPageable(), query.fetchCount()), null);

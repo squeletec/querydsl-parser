@@ -42,7 +42,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
-
 import java.util.List;
 
 @Configuration
@@ -72,7 +71,7 @@ public class SearchConfiguration implements WebMvcConfigurer {
     @Bean
     @ConditionalOnMissingBean
     public QueryVariables globalVariables(EntityManager entityManager) {
-        return JpaQueryContext.enumValues(entityManager);
+        return JpaQueryExecutor.enumValues(entityManager);
     }
 
     @Bean

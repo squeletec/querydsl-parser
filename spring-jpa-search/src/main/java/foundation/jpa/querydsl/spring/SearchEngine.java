@@ -29,7 +29,6 @@
 
 package foundation.jpa.querydsl.spring;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Predicate;
 import foundation.jpa.querydsl.QueryVariables;

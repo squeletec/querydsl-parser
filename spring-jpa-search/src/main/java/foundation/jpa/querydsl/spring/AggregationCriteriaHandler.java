@@ -31,7 +31,6 @@ package foundation.jpa.querydsl.spring;
 
 import com.querydsl.core.types.EntityPath;
 import foundation.jpa.querydsl.spring.impl.AggregateCriteriaImpl;
-import foundation.jpa.querydsl.spring.impl.SearchCriteriaImpl;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

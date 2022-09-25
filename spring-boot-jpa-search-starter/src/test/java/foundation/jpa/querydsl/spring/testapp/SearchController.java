@@ -30,7 +30,7 @@
 package foundation.jpa.querydsl.spring.testapp;
 
 import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
+import foundation.jpa.querydsl.spring.SearchEngine;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;

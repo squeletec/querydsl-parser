@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2020, Ondrej Fischer
+ * Copyright (c) 2020-2022, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,51 @@
  *
  */
 
-package foundation.jpa.querydsl.spring.testapp;
+package foundation.jpa.querydsl.parsers;
 
-import com.querydsl.core.types.EntityPath;
-import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.GetMapping;
+import foundation.jpa.querydsl.parsers.predicate.PredicateParser;
+import foundation.rpg.parser.SyntaxError;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import javax.inject.Provider;
-import java.util.List;
+import java.io.IOException;
 
-public class SearchApi<R, E extends EntityPath<R>> {
+import static org.mockito.Mockito.mock;
 
-    private final SearchEngine searchEngine;
-    private final Provider<QueryVariables> variables;
+public class PredicateParserTest {
 
-    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        this.searchEngine = searchEngine;
-        this.variables = variables;
+
+    private final PredicateParser expressionParser = new PredicateParser(mock(QueryRules.class));
+
+    @DataProvider
+    public Object[][] validPredicates() {
+        return new Object[][] {
+                {"field > 3"},
+                {"field = 3"},
+                {"field != 3"},
+                {"3 = field"},
+                {"3 = 3"},
+                {"field1 = field2"},
+                {"a = 1 and b < 4"}
+        };
     }
 
-    @GetMapping("/search")
-    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
-        return query;
+    @Test(dataProvider = "validPredicates")
+    public void predicateParserShouldAccept(String predicate) throws IOException {
+        expressionParser.parseString(predicate);
     }
 
-    @GetMapping("/searchResult")
-    public SearchResult<R> searchResult(SearchCriteria<E> query) {
-        return searchEngine.search(query, variables.get());
+    @DataProvider
+    public Object[][] invalidPredicates() {
+        return new Object[][] {
+                {"field 3"},
+                {"a = 5, b < 3"}
+        };
     }
 
-    @GetMapping("/aggregation")
-    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
-        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
-        return searchEngine.aggregate(criteria, variables.get());
-        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
+    @Test(dataProvider = "invalidPredicates", expectedExceptions = SyntaxError.class)
+    public void predicateParserShouldReject(String predicate) throws IOException {
+        expressionParser.parseString(predicate);
     }
 
 }

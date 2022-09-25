@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2020, Ondrej Fischer
+ * Copyright (c) 2020-2022, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,49 @@
  *
  */
 
-package foundation.jpa.querydsl.spring.testapp;
+package foundation.jpa.querydsl.parsers;
 
-import com.querydsl.core.types.EntityPath;
-import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.GetMapping;
+import foundation.jpa.querydsl.parsers.expressions.ExpressionsParser;
+import foundation.rpg.parser.SyntaxError;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import javax.inject.Provider;
-import java.util.List;
+import java.io.IOException;
 
-public class SearchApi<R, E extends EntityPath<R>> {
+import static org.mockito.Mockito.mock;
 
-    private final SearchEngine searchEngine;
-    private final Provider<QueryVariables> variables;
+public class ExpressionsFactoryTest {
 
-    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        this.searchEngine = searchEngine;
-        this.variables = variables;
+
+    private final ExpressionsParser expressionsParser = new ExpressionsParser(mock(SelectRules.class));
+
+    @DataProvider
+    public Object[][] validExpressions() {
+        return new Object[][]{
+                {""},
+                {"id"},
+                {"field1, field2"},
+                {"rel.name"},
+                {"field % 2"}
+        };
     }
 
-    @GetMapping("/search")
-    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
-        return query;
+    @Test(dataProvider = "validExpressions")
+    public void expressionsParserShouldAccept(String expressions) throws IOException {
+        expressionsParser.parseString(expressions);
     }
 
-    @GetMapping("/searchResult")
-    public SearchResult<R> searchResult(SearchCriteria<E> query) {
-        return searchEngine.search(query, variables.get());
+    @DataProvider
+    public Object[][] invalidExpressions() {
+        return new Object[][]{
+                {"+"},
+                {"id+"},
+        };
     }
 
-    @GetMapping("/aggregation")
-    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
-        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
-        return searchEngine.aggregate(criteria, variables.get());
-        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
+    @Test(dataProvider = "invalidExpressions", expectedExceptions = SyntaxError.class)
+    public void expressionsParserShouldReject(String expressions) throws IOException {
+        expressionsParser.parseString(expressions);
     }
 
 }

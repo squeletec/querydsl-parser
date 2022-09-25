@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2020, Ondrej Fischer
+ * Copyright (c) 2020-2022, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,26 @@
  *
  */
 
-package foundation.jpa.querydsl.spring.testapp;
+package foundation.jpa.querydsl.parsers;
 
-import com.querydsl.core.types.EntityPath;
-import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.OrderSpecifier;
+import foundation.rpg.Name;
+import foundation.rpg.StartSymbol;
+import foundation.rpg.common.rules.CommaSeparated;
+import foundation.rpg.parser.Token;
 
-import javax.inject.Provider;
 import java.util.List;
 
-public class SearchApi<R, E extends EntityPath<R>> {
+public interface OrderRules extends ExpressionRules {
 
-    private final SearchEngine searchEngine;
-    private final Provider<QueryVariables> variables;
+    @StartSymbol(parserClassName = "OrderSpecifierParser", lexerClassName = "OrderSpecifierLexer", packageName = "foundation.jpa.querydsl.parsers.order")
+    OrderSpecifier<?>[] is1 (@CommaSeparated List<OrderSpecifier<?>> l);
 
-    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        this.searchEngine = searchEngine;
-        this.variables = variables;
-    }
-
-    @GetMapping("/search")
-    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
-        return query;
-    }
-
-    @GetMapping("/searchResult")
-    public SearchResult<R> searchResult(SearchCriteria<E> query) {
-        return searchEngine.search(query, variables.get());
-    }
-
-    @GetMapping("/aggregation")
-    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
-        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
-        return searchEngine.aggregate(criteria, variables.get());
-        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
-    }
+    OrderSpecifier<?> is4(Expression<?> expression);
+    OrderSpecifier<?> is1(OrderSpecifier<?> specifier, @Name("nulls") Token nulls, @Name("first") Token last);
+    OrderSpecifier<?> is2(OrderSpecifier<?> specifier, @Name("nulls") Token nulls, @Name("last") Token last);
+    OrderSpecifier<?> is1(Expression<?> expression, @Name("asc") Token asc);
+    OrderSpecifier<?> is2(Expression<?> expression, @Name("desc") Token desc);
 
 }

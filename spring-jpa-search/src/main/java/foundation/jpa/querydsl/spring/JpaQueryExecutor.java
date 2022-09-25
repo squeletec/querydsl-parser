@@ -27,41 +27,35 @@
  *
  */
 
-package foundation.jpa.querydsl.spring.testapp;
+package foundation.jpa.querydsl.spring;
 
-import com.querydsl.core.types.EntityPath;
+import foundation.jpa.querydsl.QueryExecutor;
 import foundation.jpa.querydsl.QueryVariables;
-import foundation.jpa.querydsl.spring.*;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.core.convert.ConversionService;
 
-import javax.inject.Provider;
-import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.Attribute;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
-public class SearchApi<R, E extends EntityPath<R>> {
+public class JpaQueryExecutor extends QueryExecutor {
 
-    private final SearchEngine searchEngine;
-    private final Provider<QueryVariables> variables;
-
-    public SearchApi(SearchEngine searchEngine, Provider<QueryVariables> variables) {
-        this.searchEngine = searchEngine;
-        this.variables = variables;
+    public JpaQueryExecutor(ConversionService conversionService, EntityManager entityManager) {
+        super(conversionService::convert);
     }
 
-    @GetMapping("/search")
-    public SearchResult<R> search(@CacheQuery @DefaultQuery("name='A'") Search<E, R> query) {
-        return query;
+    public JpaQueryExecutor(EntityManager entityManager) {
+        super((o, c) -> entityManager.find(c, o));
     }
 
-    @GetMapping("/searchResult")
-    public SearchResult<R> searchResult(SearchCriteria<E> query) {
-        return searchEngine.search(query, variables.get());
-    }
-
-    @GetMapping("/aggregation")
-    public SearchResult<List<?>> aggregation(AggregateCriteria<E> criteria) {
-        //QRootEntity.rootEntity.name.eq("ROOT1").castToNum(Integer.class).sum()
-        return searchEngine.aggregate(criteria, variables.get());
-        // URI: http://localhost:8080/aggregation?criteriaSelect=name,count&criteriaGroupBy=name
+    public static QueryVariables enumValues(EntityManager entityManager) {
+        Map<String, Object> variables = new LinkedHashMap<>();
+        variables.put(Integer.class.getSimpleName(), Integer.class);
+        entityManager.getMetamodel().getEntities().stream().flatMap(e -> e.getAttributes().stream()).map(Attribute::getJavaType).filter(Class::isEnum)
+                .peek(c -> variables.put(c.getSimpleName(), c))
+                .flatMap(e -> Stream.of(((Class<Enum<?>>)e).getEnumConstants())).forEach(e -> variables.put(e.name(), e));
+        return QueryVariables.map(variables);
     }
 
 }
