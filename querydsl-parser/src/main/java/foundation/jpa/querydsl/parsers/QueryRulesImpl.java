@@ -299,7 +299,7 @@ public class QueryRulesImpl implements QueryRules, SelectRules, OrderRules {
 
     @Override
     public Object is(@Match(QUOTED_STRING) String value) {
-        return value.substring(1, value.length() - 1);
+        return value.substring(1, value.length() - 1).replace("\\r", "\r").replace("\\n", "\n").replace("\\t", "\t").replaceAll("\\\\(.)", "$1");
     }
 
     @Override

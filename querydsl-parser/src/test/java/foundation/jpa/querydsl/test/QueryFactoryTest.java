@@ -100,7 +100,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         repository.save(new RootEntity().setName("ROOT2").setEnumValue(EnumValue.VALUE2).setSize(0).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
                 new ManyToManyEntity(), new ManyToManyEntity()
         )).setOneToManyEntities(asList(
-                new OneToManyEntity().setString("D"), new OneToManyEntity().setString("A")
+                new OneToManyEntity().setString("D\r"), new OneToManyEntity().setString("A")
         )));
         FieldType string = fieldTypeRepository.save(new FieldType().setName("string"));
         DocumentType story = documentTypeRepository.save(new DocumentType().setName("Story").setDescription("Aha").setFields(asList(
@@ -126,6 +126,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     @Test
     public void test() throws IOException {
         Page<RootEntity> all = findAll("name = 'ROOT1' and oneToManyEntity.string = 'B'", 1);
+        assertEquals(all.getSize(), 1);
     }
 
     @Test
@@ -179,7 +180,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void entityNoConvertTest() throws IOException {
-        ManyToOneEntity e2 = manyToOneEntityRepository.getOne(2L);
+        ManyToOneEntity e2 = manyToOneEntityRepository.getReferenceById(2L);
         Page<RootEntity> page = repository.findAll(queryExecutor.parsePredicate(rootEntity, "manyToOneEntity = e2", local(singletonMap("e2", e2), variables)), Pageable.unpaged());
         assertEquals(page.getSize(), 1);
     }
@@ -193,6 +194,11 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     @Test
     public void manyToOneTest() throws IOException {
         findAll("oneToManyEntities.any.string = 'A'", 2);
+    }
+
+    @Test
+    public void oneToManyRTest() throws IOException {
+        findAll("oneToManyEntities.any.string = 'D\\r'", 1);
     }
 
     @Test
@@ -224,10 +230,6 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         return queryFactory.selectFrom(rootEntity).select(Projections.list(queryExecutor.parseSelect(rootEntity, fields, variables))).fetch();
     }
 
-    /**
-     * Test is currently not working due to https://github.com/querydsl/querydsl/issues/3391
-     * @throws IOException
-     */
     @Test
     public void testSelect() throws IOException {
         System.out.println(select("sum(size > 1)"));

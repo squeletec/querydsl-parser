@@ -30,8 +30,6 @@
 package foundation.jpa.querydsl.parsers;
 
 import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.SimpleExpression;
 import foundation.rpg.Match;
 import foundation.rpg.Name;
 import foundation.rpg.common.precedence.*;
@@ -45,9 +43,6 @@ import java.util.function.UnaryOperator;
 import static foundation.rpg.common.Patterns.*;
 
 public interface ExpressionRules {
-
-    //Expression<?> is(@Name("case") Token c, Expression<?> e, @Name("when") Token w, Expression<?> v, Then t, @Dangling @Name("otherwise") Token o, Expression<?> oe);
-    //Expression<?> is(@LogicalOr Expression<?> e);
 
     Expression<?> is1(Case c, Expression<?> e, UnaryOperator<Expression<?>> w, Else o, Expression<?> oe);
 
@@ -97,7 +92,7 @@ public interface ExpressionRules {
 
     Object is (@Match(DOUBLE) Double value);
     Object is (@Match(INTEGER) Long value);
-    Object is (@Match(QUOTED_STRING) String value);
+    Object is (@Match(ANY_QUOTED_STRING) String value);
     Object is (True value);
     Object is (False value);
 

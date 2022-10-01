@@ -52,7 +52,9 @@ public class PredicateParserTest {
                 {"3 = field"},
                 {"3 = 3"},
                 {"field1 = field2"},
-                {"a = 1 and b < 4"}
+                {"a = 1 and b < 4"},
+                {"b = 'a'"},
+                {"b = \"a\""}
         };
     }
 
