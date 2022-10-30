@@ -141,7 +141,7 @@ public class QueryDslBuilder {
     }
 
     public BooleanExpression stringual(Ops op, Expression<?> l, Expression<?> r) {
-        ensure(StringExpression.class, l, r);
+        ensureType(String.class, l, r);
         return booleanOperation(op, l, r);
     }
 

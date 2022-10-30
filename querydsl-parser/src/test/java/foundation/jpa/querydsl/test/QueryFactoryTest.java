@@ -130,6 +130,18 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void testLike() throws IOException {
+        Page<RootEntity> all = findAll("name ~ 'ROOT1'", 1);
+        assertEquals(all.getSize(), 1);
+    }
+
+    @Test
+    public void testLike2() throws IOException {
+        Page<RootEntity> all = findAll("name ~ 'ROO%'", 2);
+        assertEquals(all.getSize(), 2);
+    }
+
+    @Test
     public void testMap() {
         Page<Document> page = documentRepository.findAll(document.get("state").eq("New"), Pageable.unpaged());
         assertEquals(page.getSize(), 1);
