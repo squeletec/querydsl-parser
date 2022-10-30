@@ -236,7 +236,7 @@ public class QueryRulesImpl implements QueryRules, SelectRules, OrderRules {
     }
 
     @Override
-    public @Atomic Expression<?> is(Identifier id) {
+    public Entry is(Identifier id) {
         return builder.resolve(id.toString());
     }
 
@@ -268,18 +268,18 @@ public class QueryRulesImpl implements QueryRules, SelectRules, OrderRules {
     }
 
     @Override
-    public @Atomic Expression<?> is(Identifier id, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r) {
-        return builder.call(id.toString(), parameters);
+    public @Atomic Expression<?> is(Entry entry) {
+        return entry.get();
     }
 
     @Override
-    public @Atomic Expression<?> is(@Atomic Expression<?> target, Dot dot, Identifier id) {
+    public Entry is(@Atomic Expression<?> target, Dot dot, Identifier id) {
         return builder.access(target, id.toString());
     }
 
     @Override
-    public @Atomic Expression<?> is(@Atomic Expression<?> target, Dot dot, Identifier id, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r) {
-        return builder.call(target, id.toString(), parameters);
+    public @Atomic Expression<?> is(Entry entry, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r) {
+        return builder.call(entry, parameters);
     }
 
     @Override

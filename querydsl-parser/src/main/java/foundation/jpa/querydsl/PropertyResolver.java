@@ -36,6 +36,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.joining;
 
 public interface PropertyResolver {
@@ -59,7 +60,10 @@ public interface PropertyResolver {
                     },
                     () -> Expressions.class.getMethod(name).invoke(null)
             )) try {
-                return access.get();
+                Object result = access.get();
+                if(isNull(result))
+                    throw new IllegalArgumentException("Access to " + name + " on " + instance + " returned null.");
+                return result;
             } catch (InvocationTargetException | IllegalAccessException e) {
                 throw new RuntimeException(e.getMessage() + " on " + instance);
             } catch (NoSuchFieldException | NoSuchMethodException e) {

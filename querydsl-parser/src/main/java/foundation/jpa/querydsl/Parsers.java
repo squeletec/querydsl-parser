@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2020, Ondrej Fischer
+ * Copyright (c) 2020-2022, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,43 +43,42 @@ import foundation.rpg.parser.SyntaxError;
 
 import java.io.IOException;
 
-public class QueryExecutor {
+public class Parsers<T> {
 
-    private final EntityConverter entityConverter;
+    private final PredicateParser predicateParser;
+    private final OrderSpecifierParser orderSpecifierParser;
+    private final ExpressionsParser expressionsParser;
 
-    public QueryExecutor(EntityConverter entityConverter) {
-        this.entityConverter = entityConverter;
+    private Parsers(PredicateParser predicateParser, OrderSpecifierParser orderSpecifierParser, ExpressionsParser expressionsParser) {
+        this.predicateParser = predicateParser;
+        this.orderSpecifierParser = orderSpecifierParser;
+        this.expressionsParser = expressionsParser;
     }
 
-    public static QueryExecutor createContext(EntityConverter conversionService) {
-        return new QueryExecutor(conversionService);
+    public Parsers(EntityPath<T> entityPath, QueryVariables queryVariables, EntityConverter entityConverter) {
+        this(new QueryRulesImpl(new QueryDslBuilder(Context.map(queryVariables, entityConverter), entityConverter, entityPath)));
     }
 
-    public static QueryExecutor createContext() {
-        return new QueryExecutor(EntityConverter.noConversion());
+    private Parsers(QueryRulesImpl queryRules) {
+        this(new PredicateParser(queryRules), new OrderSpecifierParser(queryRules), new ExpressionsParser(queryRules));
     }
 
-    private QueryRulesImpl rules(QueryVariables queryVariables, EntityPath<?> entityPath) {
-        return new QueryRulesImpl(new QueryDslBuilder(Context.map(queryVariables, entityConverter), entityConverter, entityPath));
-    }
-
-    public Predicate parsePredicate(EntityPath<?> entityPath, String query, QueryVariables queryVariables) throws IOException, SyntaxError {
+    public Predicate parsePredicate(String query) throws IOException, SyntaxError {
         if(query == null || query.isEmpty())
             return new BooleanBuilder().and(null);
-        return new PredicateParser(rules(queryVariables, entityPath)).parseString(query);
+        return predicateParser.parseString(query);
     }
 
-    public OrderSpecifier<?>[] parseOrderSpecifier(EntityPath<?> entityPath, String orderBy) throws IOException {
+    public OrderSpecifier<?>[] parseOrderSpecifier(String orderBy) throws IOException {
         if(orderBy == null)
             return new OrderSpecifier[0];
-        return new OrderSpecifierParser(rules(QueryVariables.none(), entityPath)).parseString(orderBy);
+        return orderSpecifierParser.parseString(orderBy);
     }
 
-    public Expression<?>[] parseSelect(EntityPath<?> entityPath, String select, QueryVariables queryVariables) throws IOException {
-        if(select == null) {
+    public Expression<?>[] parseSelect(String select) throws IOException {
+        if(select == null)
             return new Expression<?>[0];
-        }
-        return new ExpressionsParser(rules(queryVariables, entityPath)).parseString(select);
+        return expressionsParser.parseString(select);
     }
 
 }

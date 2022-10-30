@@ -79,15 +79,16 @@ public interface ExpressionRules {
     @Unary Expression<?> is3(@Atomic Expression<?> expression);
 
     @Atomic Expression<?> is (LPar l, Expression<?> expression, RPar r);
-    @Atomic Expression<?> is (Identifier id);
     @Atomic Expression<?> is (@Name("count") Token count, LPar o, Expression<?> e, RPar c);
     @Atomic Expression<?> is1(@Name("sum") Token sum, LPar o, Expression<?> e, RPar c);
     @Atomic Expression<?> is2(@Name("avg") Token avg, LPar o, Expression<?> e, RPar c);
     @Atomic Expression<?> is3(@Name("min") Token count, LPar o, Expression<?> e, RPar c);
     @Atomic Expression<?> is4(@Name("max") Token count, LPar o, Expression<?> e, RPar c);
-    @Atomic Expression<?> is (Identifier id, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r);
-    @Atomic Expression<?> is (@Atomic Expression<?> target, Dot dot, Identifier id);
-    @Atomic Expression<?> is (@Atomic Expression<?> target, Dot dot, Identifier id, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r);
+    @Atomic Expression<?> is(Entry entry);
+    Entry is (Identifier id);
+    Entry is (@Atomic Expression<?> target, Dot dot, Identifier id);
+    @Atomic Expression<?> is (Entry entry, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r);
+    //@Atomic Expression<?> is (@Atomic Expression<?> target, Dot dot, Identifier id, LPar o, @CommaSeparated List<Expression<?>> parameters, RPar r);
     @Atomic Expression<?> is (Object value);
 
     Object is (@Match(DOUBLE) Double value);

@@ -34,24 +34,26 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
-import foundation.jpa.querydsl.Context;
+import foundation.jpa.querydsl.EntityConverter;
 import foundation.jpa.querydsl.QueryUtils;
+import foundation.jpa.querydsl.QueryVariables;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static com.querydsl.core.types.dsl.Expressions.*;
 
 public class QueryDslBuilder {
 
-    private final Context context;
+    private final SymbolTable context;
+    private final EntityConverter entityConverter;
     private final EntityPath<?> rootEntity;
 
-    public QueryDslBuilder(Context context, EntityPath<?> rootEntity) {
+    public QueryDslBuilder(SymbolTable context, EntityConverter entityConverter, EntityPath<?> rootEntity) {
         this.context = context;
+        this.entityConverter = entityConverter;
         this.rootEntity = rootEntity;
     }
 
@@ -98,12 +100,12 @@ public class QueryDslBuilder {
         return numberOperation((Class<T>) l.getType(), op, l, r);
     }
 
-    public Expression<?> resolve(String name) {
-        return context.isDefined(name) ? value(context.get(name)) : access(rootEntity, name);
+    public Entry resolve(String name) {
+        return context.get(name);
     }
 
-    public Expression<?> call(String name, List<Expression<?>> parameters) {
-        return call(rootEntity, name, parameters);
+    public Expression<?> call(Entry entry, List<Expression<?>> parameters) {
+        return entry.call(parameters, entityConverter);
     }
 
     public Expression<?> value(Object value) {
@@ -114,25 +116,11 @@ public class QueryDslBuilder {
         return value instanceof Expression ? (Expression<?>) value : constant(value);
     }
 
-    public Expression<?> call(Expression<?> target, String name, List<Expression<?>> parameters) {
-        Class<?> type = target.getClass();
-        int size = parameters.size();
-        Object[] arguments = parameters.stream().map(p -> p instanceof Constant ? ((Constant<?>) p).getConstant() : p).toArray();
-        for(Method method : type.getMethods()) try {
-            if(method.getName().equals(name) && method.getParameterCount() == size) {
-                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> context.convert(arguments[i], method.getParameterTypes()[i])).toArray();
-                return auto(method.invoke(target, a));
-            }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Unable to invoke method: " + name + " with " + Arrays.toString(arguments) + " on " + target + ".", e);
-        }
-        throw new IllegalArgumentException("No such method: " + name + " on " + target + " with " + size + " parameters.");
-    }
 
-    public Expression<?> access(Expression<?> target, String name) {
+    public Entry access(Expression<?> target, String name) {
         Object object = target instanceof Constant ? ((Constant<?>) target).getConstant() : target;
         Class<?> c = object instanceof Class ? (Class<?>) object : object.getClass();
-        return auto(context.access(c, target, name));
+        return context.access(c, target, name);
     }
 
     public SimpleExpression<?> simple(Expression<?> operand) {

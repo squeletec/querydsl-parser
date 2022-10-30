@@ -35,7 +35,15 @@ public interface QueryVariables {
 
     Object get(String name);
 
+    default Function getFunction(String name) {
+        return (Function) get(name);
+    }
+
     boolean isDefined(String name);
+
+    default boolean isFunction(String name) {
+        return isDefined(name) && get(name) instanceof Function;
+    }
 
     static QueryVariables none() {
         return new QueryVariables() {
@@ -77,6 +85,13 @@ public interface QueryVariables {
                 return values.containsKey(name) || parent.isDefined(name);
             }
         };
+    }
+
+    interface Function {
+
+        Object invoke(Object... parameters);
+        Class<?>[] getParameterTypes();
+
     }
 
 }
