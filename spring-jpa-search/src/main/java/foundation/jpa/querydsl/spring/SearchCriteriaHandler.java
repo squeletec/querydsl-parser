@@ -31,6 +31,7 @@ package foundation.jpa.querydsl.spring;
 
 import com.querydsl.core.types.EntityPath;
 import foundation.jpa.querydsl.spring.impl.SearchCriteriaImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,10 +52,13 @@ import static org.springframework.web.context.request.RequestAttributes.SCOPE_SE
 
 public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
 
+    private final String simpleParamName;
+
     private final int defaultPageSize;
     private final int defaultPage;
 
-    public SearchCriteriaHandler(int defaultPageSize, int defaultPage) {
+    public SearchCriteriaHandler(String simpleParamName, int defaultPageSize, int defaultPage) {
+        this.simpleParamName = simpleParamName;
         this.defaultPageSize = defaultPageSize;
         this.defaultPage = defaultPage;
     }
@@ -72,7 +76,7 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
         return new SearchCriteriaImpl<>(
                 parameterName,
                 get(nativeWebRequest, parameterName, cacheQuery, typeName, defaultQuery(methodParameter)),
-                get(nativeWebRequest, parameterName + "Order", cacheQuery, typeName, defaultSort(methodParameter)),
+                get(nativeWebRequest, from(parameterName, "Order"), cacheQuery, typeName, defaultSort(methodParameter)),
                 pageable(methodParameter.getMethodAnnotation(PageableDefault.class), parameterName, nativeWebRequest),
                 getEntityPath(methodParameter)
         );
@@ -111,6 +115,9 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
         throw new IllegalArgumentException("Method parameter " + parameter + " not proper Querydsl generated entity path.");
     }
 
+    private String from(String parameterName, String sub) {
+        return "query".equals(parameterName) ? sub.toLowerCase() : parameterName + sub;
+    }
 
     private Pageable pageable(PageableDefault pageableDefault, String parameterName, NativeWebRequest request) {
         int page = defaultPage;
@@ -119,8 +126,8 @@ public class SearchCriteriaHandler implements HandlerMethodArgumentResolver {
             page = pageableDefault.page();
             size = pageableDefault.size();
         }
-        String pageParameterName = parameterName + "Page";
-        String sizeParameterName = parameterName + "Size";
+        String pageParameterName = from(parameterName, "Page");
+        String sizeParameterName = from(parameterName, "Size");
         if(nonNull(request.getParameter(pageParameterName))) {
             page = Integer.parseInt(request.getParameter(pageParameterName));
         }

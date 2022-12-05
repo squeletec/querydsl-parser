@@ -31,6 +31,7 @@ package foundation.jpa.querydsl.spring;
 
 public class SearchCriteriaHandlerBuilder {
 
+    private String defaultName = "query";
     private int defaultPageSize = 10;
     private int defaultPage = 0;
 
@@ -52,8 +53,13 @@ public class SearchCriteriaHandlerBuilder {
         return this;
     }
 
+    public SearchCriteriaHandlerBuilder setDefaultName(String defaultName) {
+        this.defaultName = defaultName;
+        return this;
+    }
+
     public SearchCriteriaHandler build() {
-        return new SearchCriteriaHandler(defaultPageSize, defaultPage);
+        return new SearchCriteriaHandler(defaultName, defaultPageSize, defaultPage);
     }
 
 }

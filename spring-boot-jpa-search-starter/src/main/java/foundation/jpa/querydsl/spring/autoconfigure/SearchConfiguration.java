@@ -50,9 +50,10 @@ public class SearchConfiguration implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
-    public SearchCriteriaHandler searchCriteriaHandler(@Value("${querydsl.search.defaultPage:0}") int defaultPage,
+    public SearchCriteriaHandler searchCriteriaHandler(@Value("${querydsl.search.defaultName:query}") String defaultParamName,
+                                                       @Value("${querydsl.search.defaultPage:0}") int defaultPage,
                                                        @Value("${querydsl.search.defaultPageSize:25}") int defaultPageSize) {
-        return new SearchCriteriaHandler(defaultPageSize, defaultPage);
+        return new SearchCriteriaHandler(defaultParamName, defaultPageSize, defaultPage);
     }
 
     @Bean
@@ -83,7 +84,7 @@ public class SearchConfiguration implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(searchHandler(null, null, null));
-        resolvers.add(searchCriteriaHandler(0, 0));
+        resolvers.add(searchCriteriaHandler("query", 0, 0));
         resolvers.add(aggregateCriteriaHandler(0, 25));
     }
 
