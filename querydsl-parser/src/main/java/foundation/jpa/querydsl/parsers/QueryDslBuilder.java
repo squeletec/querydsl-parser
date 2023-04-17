@@ -117,6 +117,8 @@ public class QueryDslBuilder {
     private Object convert(Object object, Class<?> requiredClass) {
         if(requiredClass.isInstance(object))
             return object;
+        if(requiredClass.isAssignableFrom(Expression.class))
+            return constant(object);
         return
             context.convert(object, requiredClass);
     }
