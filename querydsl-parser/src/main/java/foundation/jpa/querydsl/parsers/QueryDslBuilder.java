@@ -114,13 +114,20 @@ public class QueryDslBuilder {
         return value instanceof Expression ? (Expression<?>) value : constant(value);
     }
 
+    private Object convert(Object object, Class<?> requiredClass) {
+        if(requiredClass.isInstance(object))
+            return object;
+        return
+            context.convert(object, requiredClass);
+    }
+
     public Expression<?> call(Expression<?> target, String name, List<Expression<?>> parameters) {
         Class<?> type = target.getClass();
         int size = parameters.size();
         Object[] arguments = parameters.stream().map(p -> p instanceof Constant ? ((Constant<?>) p).getConstant() : p).toArray();
         for(Method method : type.getMethods()) try {
             if(method.getName().equals(name) && method.getParameterCount() == size) {
-                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> context.convert(arguments[i], method.getParameterTypes()[i])).toArray();
+                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> convert(arguments[i], method.getParameterTypes()[i])).toArray();
                 return auto(method.invoke(target, a));
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
