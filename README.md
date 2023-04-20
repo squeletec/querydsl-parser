@@ -21,7 +21,7 @@ you can start very simply with following dependency:
 <dependency>
     <groupId>foundation.fluent.api</groupId>
     <artifactId>spring-boot-jpa-search-starter</artifactId>
-    <version>0.8</version>
+    <version>0.24</version>
 </dependency>
 ```
 
