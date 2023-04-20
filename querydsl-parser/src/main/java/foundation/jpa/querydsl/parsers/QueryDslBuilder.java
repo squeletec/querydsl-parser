@@ -33,17 +33,20 @@ import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.SimpleExpression;
-import com.querydsl.core.types.dsl.StringExpression;
 import foundation.jpa.querydsl.Context;
 import foundation.jpa.querydsl.QueryUtils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.querydsl.core.types.dsl.Expressions.*;
+import static java.util.stream.IntStream.range;
 
 public class QueryDslBuilder {
 
@@ -61,7 +64,7 @@ public class QueryDslBuilder {
 
     public BooleanExpression ensureBoolean(Expression<?> e) {
         if(e instanceof BooleanExpression) return (BooleanExpression) e;
-        throw new ClassCastException("" + e + " is not boolean.");
+        throw new ClassCastException(e + " is not boolean.");
     }
 
     private void ensure(Class<? extends Expression> c, Expression<?>...ts) {
@@ -123,19 +126,63 @@ public class QueryDslBuilder {
             context.convert(object, requiredClass);
     }
 
+    private static boolean isCandidate(Method method, String name, int size) {
+        return method.getName().equals(name) && (method.isVarArgs() ? size >= method.getParameterCount() - 1 : size == method.getParameterCount());
+    }
+
+    private static boolean matchParameterTypes(boolean isVarArgs, Class<?>[] parameterTypes, Object[] arguments) {
+        Class<?> lastType = parameterTypes[parameterTypes.length - 1];
+        if(isVarArgs && (arguments.length != parameterTypes.length || lastType.isInstance(arguments[arguments.length - 1]))) {
+            Class<?> varArgType = lastType.getComponentType();
+            return range(0, parameterTypes.length - 1).mapToObj(i -> parameterTypes[i].isInstance(arguments[i])).allMatch(m -> m)
+                    && range(parameterTypes.length - 1, arguments.length).allMatch(i -> varArgType.isInstance(arguments[i]));
+        } else {
+            return range(0, parameterTypes.length).mapToObj(i -> parameterTypes[i].isInstance(arguments[i])).allMatch(m -> m);
+        }
+    }
+
+    private Object[] args(boolean isVarArgs, Class<?>[] parameterTypes, Object[] arguments) {
+        Object[] result = new Object[parameterTypes.length];
+        int lastIndex = parameterTypes.length - 1;
+        Class<?> lastType = parameterTypes[lastIndex];
+        range(0, lastIndex).forEach(i -> result[i] = convert(arguments[i], parameterTypes[i]));
+        if(isVarArgs && (arguments.length != parameterTypes.length || lastType.isInstance(arguments[arguments.length - 1]))) {
+            Class<?> varArgType = lastType.getComponentType();
+            Object vars = Array.newInstance(varArgType, arguments.length - lastIndex);
+            range(lastIndex, arguments.length).forEach(i -> Array.set(vars, i, convert(arguments[i], varArgType)));
+            result[result.length - 1] = vars;
+        } else {
+            result[lastIndex] = arguments[lastIndex];
+        }
+        return result;
+    }
+
     public Expression<?> call(Expression<?> target, String name, List<Expression<?>> parameters) {
         Class<?> type = target.getClass();
         int size = parameters.size();
         Object[] arguments = parameters.stream().map(p -> p instanceof Constant ? ((Constant<?>) p).getConstant() : p).toArray();
-        for(Method method : type.getMethods()) try {
-            if(method.getName().equals(name) && method.getParameterCount() == size) {
-                Object[] a = IntStream.range(0, arguments.length).mapToObj(i -> convert(arguments[i], method.getParameterTypes()[i])).toArray();
-                return auto(method.invoke(target, a));
+        Deque<Method> candidates = new LinkedList<>();
+        Stream.of(type.getMethods()).filter(method -> isCandidate(method, name, size)).forEach(method -> {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            boolean isVarArgs = method.isVarArgs();
+            if(matchParameterTypes(isVarArgs, parameterTypes, arguments)) {
+                candidates.addFirst(method);
+            } else {
+                candidates.addLast(method);
             }
+        });
+        if(candidates.isEmpty()) {
+            throw new IllegalArgumentException("No such method: " + name + " on " + target + " with " + size + " parameters.");
+        }
+        try {
+            Method method = candidates.getFirst();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            boolean isVarArgs = method.isVarArgs();
+            Object[] a = args(isVarArgs, parameterTypes, arguments);
+            return auto(method.invoke(target, a));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Unable to invoke method: " + name + " with " + Arrays.toString(arguments) + " on " + target + ".", e);
         }
-        throw new IllegalArgumentException("No such method: " + name + " on " + target + " with " + size + " parameters.");
     }
 
     public Expression<?> access(Expression<?> target, String name) {

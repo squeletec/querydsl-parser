@@ -113,18 +113,19 @@ In order to be able to use this parser use following maven dependency:
 |Enums |`Status.OPEN`, `OPEN` | |
 |One-to-many | `project.tasks.any` | |
 
-|Operators|   |   |
-|---|---|---|
-|Equality| `project.name = 'MyProject'` | Can be used in any order  |
-|Not equality | `project.name != 'MyProject'` |  |
+|Operators|   |                                                                                                                                    |
+|---|---|------------------------------------------------------------------------------------------------------------------------------------|
+|Equality| `project.name = 'MyProject'` | Can be used in any order                                                                                                           |
+|Not equality | `project.name != 'MyProject'` |                                                                                                                                    |
 |Entity resolution | `project.owner = 'admin'` | Given that user unique ID is string, and `owner` is many-to-one, this will query for user by it's id, and compare with the `owner` |
-|Nullity | `is null` /  `not null` | |
-|Sets | `project.name in ('MyProject', 'OtherProject')` / `project.name not in ('MyProject', 'OtherProject')` | |
-|Boolean operators | `and`, `or` | |
-|Negation | `not()` | |
-|Relational operators | `>`, `<`, `>=`, `<=` | |
-|Arithmetic operators | `+`, `-`, `*`, `/`, `%` | |
-|Unary minus | `-owner.age` | |
+|Nullity | `is null` /  `not null` |                                                                                                                                    |
+|Sets | `project.name in ('MyProject', 'OtherProject')` / `project.name not in ('MyProject', 'OtherProject')` |                                                                                                                                    |
+|Boolean operators | `and`, `or` |                                                                                                                                    |
+|Negation | `not()` |                                                                                                                                    |
+|Relational operators | `>`, `<`, `>=`, `<=` |                                                                                                                                    |
+|Arithmetic operators | `+`, `-`, `*`, `/`, `%` |                                                                                                                                    |
+|Unary minus | `-owner.age` |                                                                                                                                    |
+|Like | `projec.name ~ "%something%"` |                                                                                                                                    |
 
 |Function calls | | |
 |---|---|---|

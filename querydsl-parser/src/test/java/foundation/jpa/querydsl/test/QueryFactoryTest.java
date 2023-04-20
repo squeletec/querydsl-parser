@@ -266,4 +266,20 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     public void testSelectSpread() throws IOException {
         System.out.println(select("min(size), max(size), max(size) - min(size)"));
     }
+
+    @Test
+    public void testCallContains() throws IOException {
+        System.out.println(select("name.contains('A')"));
+    }
+
+    @Test
+    public void testCallVararg() throws IOException {
+        System.out.println(select("name.coalesce('A', 'B')"));
+    }
+
+    @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No such method: nonsense on rootEntity\\.name with 1 parameters\\..*")
+    public void testCallNonexistentMethod() throws IOException {
+        System.out.println(select("name.nonsense('A')"));
+    }
+
 }
