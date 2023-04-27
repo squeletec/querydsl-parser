@@ -202,7 +202,9 @@ public class QueryDslBuilder {
     }
 
     public BooleanExpression in(Ops op, Expression<?> l, List<Expression<?>> rs) {
-        return rs.size() == 1 ? simple(Ops.EQ, l, rs.get(0)) : simple(op, l, Expressions.set(rs.toArray(new Expression<?>[0])));
+        return rs.size() == 1 ? simple(Ops.EQ, l, rs.get(0)) : simple(op, l, Expressions.set(l instanceof EntityPath
+                ? rs.stream().map(r -> r instanceof Constant ? QueryUtils.convert(r, l, context) : r).toArray(Expression[]::new)
+                : rs.toArray(new Expression<?>[0])));
     }
 
     public <T extends Number & Comparable<T>> Expression<?> numerical(Operator negate, Expression<?> operand) {
@@ -214,6 +216,10 @@ public class QueryDslBuilder {
     public Expression<?> negation(Expression<?> e) {
         ensure(BooleanExpression.class, e);
         return booleanOperation(Ops.NOT, e);
+    }
+
+    public <T> Expression<T> alias(Expression<T> expression, String alias) {
+        return new AliasExpression<>(Expressions.as(expression, context.define(alias, ExpressionUtils.path(expression.getType(), alias))), alias);
     }
 
 }

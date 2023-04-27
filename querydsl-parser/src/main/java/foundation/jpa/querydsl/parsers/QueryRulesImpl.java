@@ -91,8 +91,18 @@ public class QueryRulesImpl implements QueryRules, SelectRules, OrderRules {
     }
 
     @Override
-    public Expression<?>[] is(@CommaSeparated List<Expression<?>> l) {
-        return l.toArray(new Expression<?>[0]);
+    public Expression<?>[] is(@CommaSeparated List<SelectExpression> l) {
+        return l.stream().map(SelectExpression::getExpression).toArray(Expression<?>[]::new);
+    }
+
+    @Override
+    public SelectExpression is(Expression<?> expression) {
+        return new SelectExpression(expression);
+    }
+
+    @Override
+    public SelectExpression is(Expression<?> expression, @Name("as") Token token, Identifier alias) {
+        return is(builder.alias(expression, alias.toString()));
     }
 
     @Override

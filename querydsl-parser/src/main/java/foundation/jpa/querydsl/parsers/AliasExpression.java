@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2020-2022, Ondrej Fischer
+ * Copyright (c) 2020-2023, Ondrej Fischer
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,43 +27,33 @@
  *
  */
 
-package foundation.jpa.querydsl;
+package foundation.jpa.querydsl.parsers;
 
-public interface Context extends EntityConverter, QueryVariables {
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Visitor;
 
-    Object access(Class<?> aClass, Object instance, String name);
+public class AliasExpression<T> implements Expression<T> {
+    private final Expression<T> expression;
+    private final String alias;
 
-    static Context map(QueryVariables queryVariables, EntityConverter converter) {
-        return map(queryVariables, converter, PropertyResolver.defaultResolver(queryVariables));
+    public AliasExpression(Expression<T> expression, String alias) {
+        this.expression = expression;
+        this.alias = alias;
     }
 
-    static Context map(QueryVariables queryVariables, EntityConverter converter, PropertyResolver propertyResolver) {
-        return new Context() {
-            @Override
-            public boolean isDefined(String name) {
-                return queryVariables.isDefined(name);
-            }
+    @Override
+    public <R, C> R accept(Visitor<R, C> visitor, C context) {
+        return expression.accept(visitor, context);
+    }
 
-            @Override
-            public <T> T define(String name, T value) {
-                return queryVariables.define(name, value);
-            }
+    @Override
+    public Class<? extends T> getType() {
+        return expression.getType();
+    }
 
-            @Override
-            public Object get(String name) {
-                return queryVariables.get(name);
-            }
-
-            @Override
-            public Object convert(Object constant, Class<?> type) {
-                return converter.convert(constant, type);
-            }
-
-            @Override
-            public Object access(Class<?> aClass, Object instance, String name) {
-                return propertyResolver.access(aClass, name, instance);
-            }
-        };
+    @Override
+    public String toString() {
+        return alias;
     }
 
 }

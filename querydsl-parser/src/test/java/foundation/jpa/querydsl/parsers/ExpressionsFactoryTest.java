@@ -50,7 +50,8 @@ public class ExpressionsFactoryTest {
                 {"id"},
                 {"field1, field2"},
                 {"rel.name"},
-                {"field % 2"}
+                {"field % 2"},
+                {"count(id) as countAlias"}
         };
     }
 

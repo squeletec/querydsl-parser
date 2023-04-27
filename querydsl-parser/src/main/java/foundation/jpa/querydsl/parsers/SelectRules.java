@@ -30,15 +30,20 @@
 package foundation.jpa.querydsl.parsers;
 
 import com.querydsl.core.types.Expression;
+import foundation.rpg.Name;
 import foundation.rpg.StartSymbol;
 import foundation.rpg.common.rules.CommaSeparated;
+import foundation.rpg.common.symbols.Identifier;
+import foundation.rpg.parser.Token;
 
 import java.util.List;
 
 public interface SelectRules extends ExpressionRules {
 
     @StartSymbol(parserClassName = "ExpressionsParser", lexerClassName = "ExpressionsLexer", packageName = "foundation.jpa.querydsl.parsers.expressions")
-    Expression<?>[] is (@CommaSeparated List<Expression<?>> l);
+    Expression<?>[] is (@CommaSeparated List<SelectExpression> l);
 
+    SelectExpression is(Expression<?> expression);
+    SelectExpression is(Expression<?> expression, @Name("as") Token token, Identifier alias);
 
 }

@@ -50,7 +50,7 @@ public class QueryUtils {
 
     }
 
-    private static Expression<?> convert(Expression<?> constant, Expression<?> toType, EntityConverter entityConverter) {
+    public static Expression<?> convert(Expression<?> constant, Expression<?> toType, EntityConverter entityConverter) {
         Object value = ((Constant<?>) constant).getConstant();
         Class<?> type = toType.getType();
         return type.isInstance(value) ? constant : constant(requireNonNull(

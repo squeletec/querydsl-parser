@@ -37,6 +37,8 @@ public interface QueryVariables {
 
     boolean isDefined(String name);
 
+    <T> T define(String name, T value);
+
     static QueryVariables none() {
         return new QueryVariables() {
             @Override
@@ -47,6 +49,11 @@ public interface QueryVariables {
             @Override
             public boolean isDefined(String name) {
                 return false;
+            }
+
+            @Override
+            public <T> T define(String name, T value) {
+                return value;
             }
         };
     }
@@ -62,6 +69,12 @@ public interface QueryVariables {
             public boolean isDefined(String name) {
                 return values.containsKey(name);
             }
+
+            @Override
+            public <T> T define(String name, T value) {
+                values.put(name, value);
+                return value;
+            }
         };
     }
 
@@ -75,6 +88,12 @@ public interface QueryVariables {
             @Override
             public boolean isDefined(String name) {
                 return values.containsKey(name) || parent.isDefined(name);
+            }
+
+            @Override
+            public <T> T define(String name, T value) {
+                values.put(name, value);
+                return value;
             }
         };
     }

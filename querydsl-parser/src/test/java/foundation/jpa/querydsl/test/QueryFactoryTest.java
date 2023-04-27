@@ -53,6 +53,7 @@ import static foundation.jpa.querydsl.test.schema.QRootEntity.rootEntity;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 @SpringBootTest(classes = QueryFactoryConfig.class)
 public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
@@ -191,6 +192,11 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void entityInTest() throws IOException {
+        findAll("manyToOneEntity in (2, 2)", 1);
+    }
+
+    @Test
     public void entityNoConvertTest() throws IOException {
         ManyToOneEntity e2 = manyToOneEntityRepository.getReferenceById(2L);
         Page<RootEntity> page = repository.findAll(queryExecutor.parsePredicate(rootEntity, "manyToOneEntity = e2", local(singletonMap("e2", e2), variables)), Pageable.unpaged());
@@ -264,7 +270,8 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testSelectSpread() throws IOException {
-        System.out.println(select("min(size), max(size), max(size) - min(size)"));
+        System.out.println(select("min(size) as minSize, max(size), max(size) - min(size)"));
+        assertNotNull(variables.get("minSize"));
     }
 
     @Test
