@@ -43,12 +43,21 @@ import foundation.rpg.parser.SyntaxError;
 
 import java.io.IOException;
 
+import static java.util.Objects.isNull;
+
 public class QuerydslParser {
 
-    private final QueryRulesImpl rules;
+    public static final OrderSpecifier<?>[] DEFAULT_SPECIFIERS = new OrderSpecifier[0];
+    public static final Expression<?>[] DEFAULT_SELECT = new Expression<?>[0];
+    public static final BooleanBuilder DEFAULT_PREDICATE = new BooleanBuilder().and(null);
+    private final PredicateParser predicateParser;
+    private final OrderSpecifierParser orderSpecifierParser;
+    private final ExpressionsParser selectParser;
 
     public QuerydslParser(QueryRulesImpl rules) {
-        this.rules = rules;
+        predicateParser = new PredicateParser(rules);
+        orderSpecifierParser = new OrderSpecifierParser(rules);
+        selectParser = new ExpressionsParser(rules);
     }
 
     public QuerydslParser(EntityPath<?> entityPath, EntityConverter entityConverter, QueryVariables queryVariables) {
@@ -60,22 +69,15 @@ public class QuerydslParser {
     }
 
     public Predicate parsePredicate(String query) throws IOException, SyntaxError {
-        if(query == null || query.isEmpty())
-            return new BooleanBuilder().and(null);
-        return new PredicateParser(rules).parseString(query);
+        return isNull(query) || query.isEmpty() ? DEFAULT_PREDICATE : predicateParser.parseString(query);
     }
 
     public OrderSpecifier<?>[] parseOrderSpecifier(String orderBy) throws IOException {
-        if(orderBy == null)
-            return new OrderSpecifier[0];
-        return new OrderSpecifierParser(rules).parseString(orderBy);
+        return isNull(orderBy) ? DEFAULT_SPECIFIERS : orderSpecifierParser.parseString(orderBy);
     }
 
     public Expression<?>[] parseSelect(String select) throws IOException {
-        if(select == null) {
-            return new Expression<?>[0];
-        }
-        return new ExpressionsParser(rules).parseString(select);
+        return isNull(select) ? DEFAULT_SELECT : selectParser.parseString(select);
     }
 
 }

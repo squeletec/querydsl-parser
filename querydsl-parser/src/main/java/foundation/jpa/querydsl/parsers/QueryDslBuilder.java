@@ -102,7 +102,7 @@ public class QueryDslBuilder {
     }
 
     public Expression<?> resolve(String name) {
-        return context.isDefined(name) ? value(context.get(name)) : access(rootEntity, name);
+        return context.isDefined(name) ? auto(context.get(name)) : access(rootEntity, name);
     }
 
     public Expression<?> call(String name, List<Expression<?>> parameters) {

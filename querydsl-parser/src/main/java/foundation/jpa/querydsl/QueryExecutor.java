@@ -69,10 +69,10 @@ public class QueryExecutor {
         return new PredicateParser(rules(queryVariables, entityPath)).parseString(query);
     }
 
-    public OrderSpecifier<?>[] parseOrderSpecifier(EntityPath<?> entityPath, String orderBy) throws IOException {
+    public OrderSpecifier<?>[] parseOrderSpecifier(EntityPath<?> entityPath, String orderBy, QueryVariables queryVariables) throws IOException {
         if(orderBy == null)
             return new OrderSpecifier[0];
-        return new OrderSpecifierParser(rules(QueryVariables.none(), entityPath)).parseString(orderBy);
+        return new OrderSpecifierParser(rules(queryVariables, entityPath)).parseString(orderBy);
     }
 
     public Expression<?>[] parseSelect(EntityPath<?> entityPath, String select, QueryVariables queryVariables) throws IOException {

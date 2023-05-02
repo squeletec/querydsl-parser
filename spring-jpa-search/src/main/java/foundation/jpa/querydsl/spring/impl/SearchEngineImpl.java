@@ -78,7 +78,7 @@ public class SearchEngineImpl implements SearchEngine {
         try {
             JPAQuery<List<?>> query = queryFactory.selectFrom(criteria.getEntityPath())
                     .where(queryExecutor.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
-                    .orderBy(queryExecutor.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
+                    .orderBy(queryExecutor.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort(), variables))
                     .groupBy(queryExecutor.parseSelect(criteria.getEntityPath(), criteria.groupBy(), variables))
                     .select(Projections.list(queryExecutor.parseSelect(criteria.getEntityPath(), criteria.select(), variables)))
                     .offset(criteria.getPageable().getOffset())
@@ -92,7 +92,7 @@ public class SearchEngineImpl implements SearchEngine {
     private <E> SearchResult<E> search(SearchCriteria<? extends EntityPath<E>> criteria, QueryVariables variables, JPAQuery<E> jpaQuery) {
         try {
             JPAQuery<E> query = jpaQuery.where(queryExecutor.parsePredicate(criteria.getEntityPath(), criteria.getQuery(), variables))
-                    .orderBy(queryExecutor.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort()))
+                    .orderBy(queryExecutor.parseOrderSpecifier(criteria.getEntityPath(), criteria.getSort(), variables))
                     .offset(criteria.getPageable().getOffset())
                     .limit(criteria.getPageable().getPageSize());
             return new SearchResultImpl<>(criteria, new PageImpl<>(query.fetch(), criteria.getPageable(), query.fetchCount()), null);

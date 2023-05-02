@@ -33,6 +33,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import foundation.jpa.querydsl.QueryExecutor;
 import foundation.jpa.querydsl.QueryVariables;
+import foundation.jpa.querydsl.QuerydslParser;
 import foundation.jpa.querydsl.test.schema.*;
 import foundation.rpg.parser.SyntaxError;
 import org.springframework.boot.test.context.SpringBootTest;
