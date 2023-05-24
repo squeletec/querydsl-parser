@@ -170,7 +170,7 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
         assertEquals(page.getSize(), 1);
     }
 
-    @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No such property: oneToManyEee on rootEntity. Available properties are: rootEntity, enumValue, id, intValue, manyToManyEntities, manyToOneEntity, name, oneToManyEntities, size\n" +
+    @Test(expectedExceptions = SyntaxError.class, expectedExceptionsMessageRegExp = "Syntax error: No such property: oneToManyEee on rootEntity. Available properties are: rootEntity, enumValue, id, intValue, manyToManyEntities, manyToOneEntity, name, oneToManyEntities, size, zonedDateTime\n" +
             "\tat string: line: 1, character: 13")
     public void negativeTest() throws IOException {
         findAll("oneToManyEee.name = aaaROOT1", 1);
