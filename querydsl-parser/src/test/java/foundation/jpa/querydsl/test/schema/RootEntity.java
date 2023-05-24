@@ -30,6 +30,7 @@
 package foundation.jpa.querydsl.test.schema;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Entity
@@ -55,6 +56,8 @@ public class RootEntity {
     private int intValue;
 
     private EnumValue enumValue;
+
+    private ZonedDateTime zonedDateTime;
 
     public long getId() {
         return id;
@@ -125,6 +128,15 @@ public class RootEntity {
 
     public RootEntity setEnumValue(EnumValue enumValue) {
         this.enumValue = enumValue;
+        return this;
+    }
+
+    public ZonedDateTime getZonedDateTime() {
+        return zonedDateTime;
+    }
+
+    public RootEntity setZonedDateTime(ZonedDateTime zonedDateTime) {
+        this.zonedDateTime = zonedDateTime;
         return this;
     }
 

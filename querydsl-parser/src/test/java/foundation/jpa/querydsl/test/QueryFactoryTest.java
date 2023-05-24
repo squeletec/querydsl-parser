@@ -45,6 +45,7 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -83,6 +84,8 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     @Inject
     private QueryVariables variables;
 
+    private final ZonedDateTime base = ZonedDateTime.now();
+
     private boolean loaded = false;
     private Page<RootEntity> findAll(String query, int expectedSize) throws IOException {
         Page<RootEntity> page = repository.findAll(queryExecutor.parsePredicate(rootEntity, query, variables), Pageable.unpaged());
@@ -94,12 +97,12 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     public void load() {
         if(loaded) return;
         loaded = true;
-        repository.save(new RootEntity().setName("ROOT1").setEnumValue(EnumValue.VALUE1).setSize(15).setIntValue(1).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
+        repository.save(new RootEntity().setZonedDateTime(base.minusHours(4)).setName("ROOT1").setEnumValue(EnumValue.VALUE1).setSize(15).setIntValue(1).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
                 new ManyToManyEntity(), new ManyToManyEntity()
         )).setOneToManyEntities(asList(
                 new OneToManyEntity().setString("A"), new OneToManyEntity().setString("B"), new OneToManyEntity().setString("C")
         )));
-        repository.save(new RootEntity().setName("ROOT2").setEnumValue(EnumValue.VALUE2).setSize(0).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
+        repository.save(new RootEntity().setZonedDateTime(base.minusHours(2)).setName("ROOT2").setEnumValue(EnumValue.VALUE2).setSize(0).setManyToOneEntity(new ManyToOneEntity()).setManyToManyEntities(asList(
                 new ManyToManyEntity(), new ManyToManyEntity()
         )).setOneToManyEntities(asList(
                 new OneToManyEntity().setString("D\r"), new OneToManyEntity().setString("A")
@@ -153,6 +156,12 @@ public class QueryFactoryTest extends AbstractTestNGSpringContextTests {
     public void testMapQuery() throws IOException {
         Page<Document> page = documentRepository.findAll(queryExecutor.parsePredicate(document, "state = 'New' and priority = 'Critical'", variables), Pageable.unpaged());
         assertEquals(page.getSize(), 1);
+    }
+
+    @Test(enabled = false)
+    public void testTime() throws IOException {
+        Page<RootEntity> all = findAll("zonedDateTime > '" + base.minusHours(3) + "'", 2);
+        assertEquals(all.getSize(), 2);
     }
 
     @Test

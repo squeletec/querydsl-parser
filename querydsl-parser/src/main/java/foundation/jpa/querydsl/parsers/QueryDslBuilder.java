@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.dsl.Expressions.*;
+import static foundation.jpa.querydsl.QueryUtils.ensureType;
 import static java.util.stream.IntStream.range;
 
 public class QueryDslBuilder {
@@ -72,11 +73,6 @@ public class QueryDslBuilder {
             throw new IllegalArgumentException(t + " is not " + c.getSimpleName() + " but " + c.getSimpleName() + " is expected.");
     }
 
-    private void ensureType(Class<?> c, Expression<?>...ts) {
-        for(Expression<?> t : ts) if(!c.isAssignableFrom(t.getType()))
-            throw new IllegalArgumentException(t + " is not " + c.getSimpleName() + " but " + c.getSimpleName() + " is expected.");
-    }
-
     public BooleanExpression logical(Ops op, Expression<?> l, Expression<?> r) {
         ensure(BooleanExpression.class, l, r);
         return booleanOperation(op, l, r);
@@ -91,8 +87,7 @@ public class QueryDslBuilder {
     }
 
     public Expression<?> relational(Ops op, Expression<?> l, Expression<?> r) {
-        ensureType(Comparable.class, l, r);
-        return booleanOperation(op, l, r);
+        return QueryUtils.resolveOperationRequiring(op, l, r, context, Comparable.class);
     }
 
     public <T extends Number & Comparable<T>> Expression<?> numerical(Ops op, Expression<?> l, Expression<?> r) {

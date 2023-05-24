@@ -36,6 +36,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import javax.persistence.EntityManager;
@@ -53,8 +54,8 @@ public class QueryFactoryConfig {
     public interface RootEntities extends QuerydslPredicateExecutor<RootEntity> {}
 
     @Bean
-    public QueryExecutor context(EntityManager entityManager) {
-        return QueryExecutor.createContext((o, c) -> entityManager.find(c, o));
+    public QueryExecutor context(ConversionService conversionService, EntityManager entityManager) {
+        return QueryExecutor.createContext(conversionService::convert);
     }
 
     @Bean

@@ -29,10 +29,7 @@
 
 package foundation.jpa.querydsl;
 
-import com.querydsl.core.types.Constant;
-import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Ops;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 
@@ -41,13 +38,22 @@ import static java.util.Objects.requireNonNull;
 
 public class QueryUtils {
     public static BooleanExpression resolveOperation(Ops operator, Expression<?> leftOperand, Expression<?> rightOperand, EntityConverter entityConverter) {
-        if(leftOperand instanceof EntityPath && rightOperand instanceof Constant) {
+        if(leftOperand instanceof Path && rightOperand instanceof Constant) {
             rightOperand = convert(rightOperand, leftOperand, entityConverter);
-        } else if(rightOperand instanceof EntityPath && leftOperand instanceof Constant) {
+        } else if(rightOperand instanceof Path && leftOperand instanceof Constant) {
             leftOperand = convert(leftOperand, rightOperand, entityConverter);
         }
         return Expressions.booleanOperation(operator, leftOperand, rightOperand);
+    }
 
+    public static BooleanExpression resolveOperationRequiring(Ops operator, Expression<?> leftOperand, Expression<?> rightOperand, EntityConverter entityConverter, Class<?> type) {
+        if(leftOperand instanceof Path && rightOperand instanceof Constant) {
+            rightOperand = convert(rightOperand, leftOperand, entityConverter);
+        } else if(rightOperand instanceof Path && leftOperand instanceof Constant) {
+            leftOperand = convert(leftOperand, rightOperand, entityConverter);
+        }
+        ensureType(type, leftOperand, rightOperand);
+        return Expressions.booleanOperation(operator, leftOperand, rightOperand);
     }
 
     public static Expression<?> convert(Expression<?> constant, Expression<?> toType, EntityConverter entityConverter) {
@@ -58,4 +64,10 @@ public class QueryUtils {
                 () -> "No " + type.getSimpleName() + " " + value + " exists!"
         ));
     }
+
+    public static void ensureType(Class<?> c, Expression<?>...ts) {
+        for(Expression<?> t : ts) if(!c.isAssignableFrom(t.getType()))
+            throw new IllegalArgumentException(t + " is not " + c.getSimpleName() + " but " + c.getSimpleName() + " is expected.");
+    }
+
 }
