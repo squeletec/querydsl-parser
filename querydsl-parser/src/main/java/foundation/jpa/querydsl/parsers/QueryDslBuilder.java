@@ -147,7 +147,7 @@ public class QueryDslBuilder {
             range(lastIndex, arguments.length).forEach(i -> Array.set(vars, i, convert(arguments[i], varArgType)));
             result[result.length - 1] = vars;
         } else {
-            result[lastIndex] = arguments[lastIndex];
+            result[lastIndex] = convert(arguments[lastIndex], parameterTypes[lastIndex]);
         }
         return result;
     }
